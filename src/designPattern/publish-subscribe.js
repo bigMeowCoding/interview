@@ -29,6 +29,7 @@ const publish = {
     });
   },
 };
+
 const cb1 = (d) => {
   console.log("motherFuck", d);
 };

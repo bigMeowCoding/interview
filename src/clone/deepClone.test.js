@@ -17,11 +17,16 @@ describe("deepClone", () => {
       c: {
         d: 4,
       },
+      fun:(a,b)=> {
+        return a+b
+      }
     };
     const clone = deepClone(obj);
     expect(clone).not.toBe(obj);
     expect(clone.a).toBe(1);
     expect(clone.c.d).toBe(4);
+    expect(obj.fun(1,2)).toBe(3)
+    expect(obj.fun(2,2)).toBe(4)
   });
   it("array", () => {
     let arr = [1, 2, 3];

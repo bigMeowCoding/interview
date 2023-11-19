@@ -26,7 +26,7 @@ export function deepClone(params, map = new WeakMap()) {
 
   function isObject(value) {
     const type = typeof value;
-    return value !== null && (type === "object" || type === "function");
+    return value !== null && type === "object";
   }
   function getType(value) {
     return Object.prototype.toString.call(value);
@@ -40,6 +40,7 @@ export function deepClone(params, map = new WeakMap()) {
     const ctor = target.constructor;
     const reFlags = /\W*$/;
     const source = target.source;
+
     // const flag = reFlags.exec(target.source);
     console.log("reflag", target.flags);
     return new ctor(source, target.flags);

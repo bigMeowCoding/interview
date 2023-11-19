@@ -18,7 +18,7 @@ describe("deepClone", () => {
       },
     };
     const clone = deepClone(obj);
-    !expect(clone).toEqual(obj);
+    expect(clone).not.toBe(obj);
     expect(clone.a).toBe(1);
     expect(clone.c.d).toBe(4);
   });

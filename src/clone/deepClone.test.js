@@ -45,4 +45,26 @@ describe("deepClone", () => {
     expect(clone.c.d).toBe(4);
     expect(clone.c.obj.b).toBe(2);
   });
+  it("set", () => {
+    let set = new Set([1, 2, 2, 3, 3, 4]);
+    const cloneSet = deepClone(set);
+    expect(cloneSet).not.toBe(set);
+    expect(cloneSet.size).toBe(4);
+    expect(cloneSet.has(2)).toBeTruthy();
+    expect(cloneSet.has(5)).toBeFalsy();
+    cloneSet.add(5);
+    expect(cloneSet.has(5)).toBeTruthy();
+  });
+  it("map", () => {
+    let map = new Map();
+    map.set("key1", 1);
+    map.set("key2", { a: 1 });
+    map.set("key3", [1, 2, 3]);
+    const cloneMap = deepClone(map);
+    expect(cloneMap).not.toBe(map);
+    expect(cloneMap.has("key1")).toBeTruthy();
+    expect(cloneMap.get("key2")).toEqual({ a: 1 });
+    expect(cloneMap.get("key3").length).toBe(3);
+    expect(cloneMap.get("key3")[1]).toBe(2);
+  });
 });

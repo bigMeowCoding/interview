@@ -1,3 +1,7 @@
+function isObject(value) {
+  const type = typeof value;
+  return value !== null && (type === "object" || type === "function");
+}
 export function deepClone(params, map = new WeakMap()) {
   function forEach(array, iterator) {
     let index = 0;
@@ -7,7 +11,7 @@ export function deepClone(params, map = new WeakMap()) {
     }
   }
 
-  if (typeof params === "object") {
+  if (isObject(params)) {
     if (map.has(params)) {
       return map.get(params);
     }

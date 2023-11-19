@@ -43,7 +43,6 @@ describe("deepClone", () => {
     !expect(clone).toEqual(obj);
     expect(clone.a).toBe(1);
     expect(clone.c.d).toBe(4);
-
     expect(clone.c.obj.b).toBe(2);
   });
 });

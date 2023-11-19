@@ -2,6 +2,7 @@
 import { expect, test, describe, it } from "vitest";
 
 import { deepClone } from "./deepClone";
+import { populateGlobal } from "vitest/environments";
 
 describe("deepClone", () => {
   it("basicType", () => {
@@ -66,5 +67,37 @@ describe("deepClone", () => {
     expect(cloneMap.get("key2")).toEqual({ a: 1 });
     expect(cloneMap.get("key3").length).toBe(3);
     expect(cloneMap.get("key3")[1]).toBe(2);
+  });
+  it("装箱对象", () => {
+    let obj = {
+      a: new Number(1),
+      b: new String("string"),
+      c: new Boolean(false),
+    };
+    let copy = deepClone(obj);
+    expect(copy.a).not.toBe(obj.a);
+    expect(copy.a.constructor).toBe(Number);
+    expect(copy.b.constructor).toBe(String);
+    expect(copy.c.constructor).toBe(Boolean);
+
+    expect(copy.a.valueOf()).toBe(1);
+    expect(copy.b.toString()).toBe("string");
+    expect(copy.c.valueOf()).toBe(false);
+  });
+  it("正则", () => {
+    let reg1 = /^1[34578]\d{9}$/g;
+    let copyReg1 = deepClone(reg1);
+    expect(copyReg1).not.toBe(reg1);
+    expect(copyReg1.test("sdfsdf")).toBeFalsy();
+    expect(copyReg1.test("13344444444")).toBeTruthy();
+    expect(copyReg1.test("22344444444")).toBeFalsy();
+    expect(copyReg1.flags).toBe("g");
+
+
+    const reg2 = /\w+/gi; // 示例正则表达式，包含全局（g）和不区分大小写（i）标志
+
+    let copyReg2 = deepClone(reg2);
+
+    expect(copyReg2.flags).toBe("gi");
   });
 });

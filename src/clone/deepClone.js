@@ -1,7 +1,19 @@
 const objTag = "[object Object]",
   arrayTag = "[object Array]",
   mapTag = "[object Map]",
-  setTag = "[object Set]";
+  setTag = "[object Set]",
+  numberTag = "[object Number]",
+  stringTag = "[object String]",
+  booleanTag = "[object Boolean]",
+  dateTag = "[object Date]",
+  errorTag = "[object Error]",
+  regexpTag = "[object RegExp]",
+  symbolTag = "[object Symbol]";
+
+function copySymbol(target) {
+  return undefined;
+}
+
 export function deepClone(params, map = new WeakMap()) {
   const deepTags = [objTag, arrayTag, mapTag, setTag];
   function forEach(array, iterator) {
@@ -23,17 +35,48 @@ export function deepClone(params, map = new WeakMap()) {
     const ctor = target.constructor;
     return new ctor();
   }
+
+  function copyRegexTag(target) {
+    const ctor = target.constructor;
+    const reFlags = /\W*$/;
+    const source = target.source;
+    // const flag = reFlags.exec(target.source);
+    console.log("reflag", target.flags);
+    return new ctor(source, target.flags);
+  }
+
+  function getOtherTypeInit(target, type) {
+    const ctor = target.constructor;
+    switch (type) {
+      case numberTag:
+      case stringTag:
+      case errorTag:
+      case dateTag:
+        return new ctor(target);
+      case booleanTag:
+        return new ctor(target.valueOf());
+
+      case regexpTag:
+        return copyRegexTag(target);
+
+      default:
+        return null;
+    }
+  }
+
   if (!isObject(params)) {
     return params;
   }
   const type = getType(params);
-  console.log(type, "ttt");
   if (map.has(params)) {
     return map.get(params);
   }
   let obj = null;
   if (deepTags.includes(type)) {
     obj = getInit(params);
+  } else {
+    obj = getOtherTypeInit(params, type);
+    return obj;
   }
 
   map.set(params, obj);

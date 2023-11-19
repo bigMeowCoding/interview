@@ -26,11 +26,18 @@ export function xhrRequest(
     };
     xhr.responseType = "json";
     xhr.setRequestHeader("Content-Type", "application/json"); // 设置 Content-Type
-    xhr.setRequestHeader("Accept", "application/json");
-    if(data){
-      data=JSON.stringify(data)
+    // xhr.setRequestHeader("Accept", "application/json");
+    if (data) {
+      data = JSON.stringify(data);
     }
     xhr.send(data);
-
   });
 }
+
+xhrRequest(
+  "http://localhost:3333/api/getRecommend",
+  { a: 1 },
+  { method: "POST" },
+).then((res) => {
+  console.log(res);
+});

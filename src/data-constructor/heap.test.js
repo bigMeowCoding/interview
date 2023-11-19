@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 
 import { MinHeap } from "./heap";
 
-test("basic", () => {
+test("heap", () => {
   const heap = new MinHeap();
   let arr = [3, 2, 1, 5, 6, 4];
   for (let num of arr) {

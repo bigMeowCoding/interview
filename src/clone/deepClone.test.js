@@ -17,21 +17,22 @@ describe("deepClone", () => {
       c: {
         d: 4,
       },
-      fun:(a,b)=> {
-        return a+b
-      }
+      fun: (a, b) => {
+        return a + b;
+      },
     };
     const clone = deepClone(obj);
     expect(clone).not.toBe(obj);
     expect(clone.a).toBe(1);
     expect(clone.c.d).toBe(4);
-    expect(obj.fun(1,2)).toBe(3)
-    expect(obj.fun(2,2)).toBe(4)
+    expect(obj.fun(1, 2)).toBe(3);
+    expect(obj.fun(2, 2)).toBe(4);
   });
   it("array", () => {
     let arr = [1, 2, 3];
     const cloneArr = deepClone(arr);
-    !expect(cloneArr).toEqual(arr);
+    expect(cloneArr).not.toBe(arr);
+    expect(cloneArr).toEqual(arr);
     expect(cloneArr.length).toBe(3);
     expect(cloneArr[0]).toEqual(1);
     expect(cloneArr[2]).toEqual(3);
@@ -98,11 +99,23 @@ describe("deepClone", () => {
     expect(copyReg1.test("22344444444")).toBeFalsy();
     expect(copyReg1.flags).toBe("g");
 
-
     const reg2 = /\w+/gi; // 示例正则表达式，包含全局（g）和不区分大小写（i）标志
 
     let copyReg2 = deepClone(reg2);
 
     expect(copyReg2.flags).toBe("gi");
   });
+  it("date", () => {
+    let date = new Date();
+    let copyDate = deepClone(date);
+    expect(copyDate).not.toBe(date);
+    expect(copyDate.getTime()).toEqual(date.getTime());
+  });
+  it("error", () => {
+    let error = new Error('msg');
+    let copyError = deepClone(error);
+    expect(copyError).not.toBe(error);
+    // expect(copyError.message).toBe(error)
+    // console.log(copyError)
+  })
 });

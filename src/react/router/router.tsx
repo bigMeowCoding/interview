@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FC } from "react";
+import { RouterContext } from "./context";
 
 interface Props {}
-export const RouterContext = React.createContext<{
-  currentPath: "";
-}>({ currentPath: "" });
+
 const Router: FC<Props> = ({ children }) => {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   function locationChange(path) {
@@ -18,7 +17,7 @@ const Router: FC<Props> = ({ children }) => {
     };
   }, []);
   return (
-    <RouterContext.Provider value={{ currentPath }}>
+    <RouterContext.Provider value={{ currentPath, mode: "browser" }}>
       {children}
     </RouterContext.Provider>
   );

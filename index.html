@@ -4,16 +4,43 @@
     <meta charset="UTF-8" />
     <title>Title</title>
     <link rel="stylesheet" href="index.css" />
+    <style>
+      .parent {
+        background: yellow;
+        /*opacity: 0;*/
+        visibility: hidden;
+      }
+      .parent,.child {
+        width:200px;
+        height:200px
+      }
+      .child {
+        /*visibility: visible;*/
+        /*opacity: 1;*/
+        background: red;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <!--    <pre id="fileContent"></pre>-->
     <div id="image"></div>
     <!--  <div id="div"></div>-->
-
-    <!--    <script type="module" src="/src/basic/interval.js"></script>-->
+<div class="parent">
+  parent
+  <div class="child">child</div>
+</div>
+        <script type="module" src="/src/basic/interval.js"></script>
     <script type="module" src="/src/file/file-reader-image.js"></script>
     <script type="module" src="src/react/index.tsx"></script>
+    <script>
+    // function wookloop(e) {
+    //   console.log(e && e.didTimeout,e&&e.timeRemaining())
+    //   requestIdleCallback(wookloop)
+    // }
+    // wookloop()
+    </script>
+<!--    <script type="module" src="/src/basic/requestIdleCallBackShim.js"></script>-->
     <!--    <script type="module" src="/src/basic/ajax.ts"></script>-->
   </body>
 </html>

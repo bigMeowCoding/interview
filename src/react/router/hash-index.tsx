@@ -1,12 +1,24 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { FC } from "react";
 import Router from "./router";
 import Route from "./route";
 import Link from "./link";
 import HashRouter from "./hash-router";
-
+import { Spin } from "antd";
+import { customeLazy } from "../../basic/lazy";
+const LazyButton = customeLazy(() => {
+  return import("../counter/index");
+});
 interface Props {}
-const Home = () => <h2>Home context</h2>;
+const Home = () => (
+  <div>
+    home
+    <Suspense fallback={<Spin />}>
+      <h2>Preview</h2>
+      <LazyButton />
+    </Suspense>
+  </div>
+);
 const About = () => <h2>About context</h2>;
 const HashRouterDemo: FC<Props> = () => {
   return (

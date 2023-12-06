@@ -6,15 +6,17 @@ import ReduxDemo from "./redux";
 import WaterPrint from "./canvas/water-print/water-print";
 import ClipDemo from "./canvas/clip";
 import Counter from "./counter";
+import CounterDown from "./counter-down";
 
 const rootEl = document.getElementById("root");
 const root = createRoot(rootEl);
 root.render(
-  <StrictMode>
+  <>
     {/*<RouterDemo/>*/}
-      <HashRouterDemo/>
+    {/*  <HashRouterDemo/>*/}
     {/*<ReduxDemo />*/}
+      <CounterDown/>
     {/*  <WaterPrint/>*/}
     {/*  <ClipDemo/>*/}
-  </StrictMode>,
+  </>,
 );

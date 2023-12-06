@@ -5,7 +5,9 @@ interface Props {}
 
 const Provider: FC<Props> = ({ store, children }) => {
   return (
-    <ReduxContext.Provider value={store}>{children}</ReduxContext.Provider>
+      <ReduxContext.Provider value={store}>
+        {children}
+      </ReduxContext.Provider>
   );
 };
 

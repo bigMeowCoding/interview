@@ -1,80 +1,71 @@
- function createStore(reducer, initialState, middlewares = []) {
-  let state = initialState,
-    listeners = [];
+const actionType = {
+  add: "INCREMENT",
+  minus: "DECREMENT",
+};
+export function createStore(reducer, initialState) {
+  let state = initialState;
+  const listeners = [];
   function getState() {
     return state;
   }
-
   function dispatch(action) {
-    state = reducer(state, action);
-    listeners.forEach((item) => item());
+    state = reducer(action, state);
+    listeners.forEach((listener) => {
+      listener();
+    });
   }
+
   function subscribe(listener) {
     listeners.push(listener);
-    return function unsubscribe() {
-      const index = listeners.findIndex((item) => {
-        return item === listener;
-      });
-      index !== -1 && listeners.splice(index, 1);
+
+    return {
+      unsubscribe() {
+        const index = listeners.findIndex(listener);
+        listeners.splice(index, 1);
+      },
     };
   }
 
-  const middlewareAPI = {
-    getState,
-    dispatch,
-  };
-  const chain = middlewares.map((item) => item(middlewareAPI));
-  dispatch = compose(...chain)(dispatch);
   return {
     getState,
     dispatch,
     subscribe,
   };
 }
-function compose(...func) {
-  if (!func.length) {
-    return (arg) => arg;
-  }
-
-  if (func.length === 1) {
-    return func[0];
-  }
-  return func.reduce(
-    (a, b) =>
-      (...args) =>
-        a(b(...args)),
-  );
-}
- function counterReducer(state = 0, action) {
+export function counterReducer(action, state) {
   switch (action.type) {
-    case "INCREMENT":
+    case actionType.add:
       return state + 1;
-    case "DECREMENT":
+    case actionType.minus:
       return state - 1;
     default:
       return state;
   }
 }
+
 const loggerMiddleware =
   ({ getState }) =>
   (next) =>
   (action) => {
-      console.log(next,action,'lllll')
+    console.log(next, action, "lllll");
     // console.log("prev state", getState());
     next(action);
     // console.log("next state", getState());
   };
- const testMiddleware =
-     ({ getState }) =>
-         (next) =>
-             (action) => {
-                 console.log(next,action,'test')
-                 // console.log("prev state", getState());
-                 next(action);
-                 // console.log("next state", getState());
-             };
+const testMiddleware =
+  ({ getState }) =>
+  (next) =>
+  (action) => {
+    console.log(next, action, "test");
+    // console.log("prev state", getState());
+    next(action);
+    // console.log("next state", getState());
+  };
 // 使用
-const store = createStore(counterReducer, 0, [loggerMiddleware,testMiddleware]);
+const store = createStore(counterReducer, 0, [
+  loggerMiddleware,
+  testMiddleware,
+]);
 store.subscribe(() => console.log("listener=======", store.getState()));
 
 store.dispatch({ type: "INCREMENT" }); // 1

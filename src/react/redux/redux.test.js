@@ -1,7 +1,7 @@
 // 导入简易Redux实现和reducer
 // 假设它们定义在'simpleRedux.js'文件中
 import { describe, beforeEach, expect, test } from "vitest";
-import { counterReducer, createStore } from "./redux";
+import { counterReducer, createStore } from "./redux.js";
 
 describe("counterReducer", () => {
   let store;

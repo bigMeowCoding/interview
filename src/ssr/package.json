@@ -1,0 +1,28 @@
+{
+  "name": "ssr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "npm-run-all --parallel dev:**",
+    "dev:buildServer": "webpack --config webpack.server.js --watch",
+    "dev:buildClient": "webpack --config webpack.client.js --watch",
+    "dev:start": "nodemon  --watch build --exec node build/bundle.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/preset-react": "^7.23.3",
+    "babel-loader": "^9.1.3",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.2",
+    "npm-run-all": "^4.1.5",
+    "react": "^18.2.0",
+    "webpack": "^5.89.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
+}

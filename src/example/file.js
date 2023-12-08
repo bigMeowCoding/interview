@@ -2,7 +2,7 @@ import fs from "fs";
 import readline from "readline";
 
 function readfile() {
-  fs.readFile("./a.md", "utf8", (err, data) => {
+  fs.readFile("./a.md",  (err, data) => {
     console.log(err, data);
   });
 }
@@ -54,4 +54,4 @@ function writeFile() {
         console.error("读取文件时发生错误:", error);
     });
 }
-writeFile();
+readfile();

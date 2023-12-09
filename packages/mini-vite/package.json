@@ -1,0 +1,21 @@
+{
+  "name": "mini-vite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "keywords": [],
+  "dependencies": {
+    "koa": "^2.14.2",
+    "koa-send": "^5.0.1",
+    "lodash-es": "^4.17.21",
+    "vue": "^3.3.11"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vue/compiler-sfc": "^3.3.11"
+  }
+}

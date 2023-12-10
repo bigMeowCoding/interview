@@ -14,9 +14,9 @@ root.render(
   <>
     {/*<RouterDemo/>*/}
     {/*  <HashRouterDemo/>*/}
-    <ReduxDemo />
+    {/*<ReduxDemo />*/}
       {/*<CounterDown/>*/}
     {/*  <WaterPrint/>*/}
-    {/*  <ClipDemo/>*/}
+      <ClipDemo/>
   </>,
 );

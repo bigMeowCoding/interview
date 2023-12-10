@@ -103,7 +103,8 @@ const ClipDemo: FC<Props> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  // 设置像素分配比例
+  function init() {
     try {
       initSize = {
         width: 500, //canvasRef.current!.clientWidth,
@@ -116,7 +117,12 @@ const ClipDemo: FC<Props> = () => {
     } catch (e) {
       alert("浏览器不支持canvas");
     }
+  }
+
+  useEffect(() => {
+    init();
   }, []);
+
   const checkInPath = (pathX: number, pathY: number, rectPosi: number[]) => {
     ctx.beginPath();
     // @ts-ignore
@@ -125,6 +131,7 @@ const ClipDemo: FC<Props> = () => {
     ctx.closePath();
     return result;
   };
+
   const drawCover = () => {
     ctx.save();
     ctx.fillStyle = "rgba(0,0,0,0.5)";
@@ -162,10 +169,12 @@ const ClipDemo: FC<Props> = () => {
     }
     const { offsetX, offsetY } = e.nativeEvent;
     const pathX = offsetX * ratio;
-    const pathY = offsetY * ratio;
+    const pathY = offsetY * ratio; // 判断点是否在路径中需要比例
     let cursor = "crosshair";
     cursorIndex = 9;
     // console.log("mousepo", mousePosi);
+    console.log("mouseMove=====", e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    console.log(mousePosi, "moueposiiii");
     for (let i = 0; i < mousePosi.length; i++) {
       if (checkInPath(pathX, pathY, mousePosi[i])) {
         cursor = getCursorStyle(i);
@@ -198,7 +207,7 @@ const ClipDemo: FC<Props> = () => {
       selectPosi,
       { x: distanceX, y: distanceY },
     );
-    console.log("dddddd", selectPosi, tempCursorIndex, cursorIndex);
+    // console.log("dddddd", selectPosi, tempCursorIndex, cursorIndex);
     drawSelect(selectPosi.x, selectPosi.y, selectPosi.w, selectPosi.h);
 
     initMousePosi = {
@@ -212,7 +221,7 @@ const ClipDemo: FC<Props> = () => {
   }
 
   function mouseDown(e) {
-    // console.log("mouseDown=====", e.nativeEvent);
+    console.log("mouseDown=====", e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     if (cursorIndex === 9) {
       resetSelect = true;
     }
@@ -222,6 +231,31 @@ const ClipDemo: FC<Props> = () => {
       y: e.nativeEvent.offsetY,
     };
   }
+  const cancelChangeSelect = async () => {
+    // if (selectPosi.w < 0 || selectPosi.h < 0) {
+    //   // selectPosi = getAnewXY(selectPosi);
+    //   const { x, y, w, h } = selectPosi;
+    //   mousePosi = getMousePosi(x, y, w, h);
+    // }
+
+    // if (canChangeSelect) {
+    //   dataUrl && window.URL.revokeObjectURL(dataUrl);
+    //   const blob = (await getPhotoData({
+    //     imgSize,
+    //     rotate,
+    //     img,
+    //     canvasSize,
+    //     imgScale,
+    //     selectPosi,
+    //     grayscale,
+    //   })) as Blob;
+    //   const newDataUrl = window.URL.createObjectURL(blob);
+    //   setDataUrl(newDataUrl);
+    // }
+
+    canChangeSelect = false;
+    tempCursorIndex = null;
+  };
 
   /**
    * 1. 计算图片scale
@@ -258,7 +292,7 @@ const ClipDemo: FC<Props> = () => {
     canvasRef.current.style.height = `${canvasHeight}px`;
     canvasRef.current.width = canvasWidth * ratio;
     canvasRef.current.height = canvasHeight * ratio;
-    ctx.scale(ratio, ratio);
+    ctx.scale(ratio, ratio); // 画布宽高设置比例后，这里也要有
     canvasSize = {
       width: canvasWidth,
       height: canvasHeight,
@@ -273,19 +307,22 @@ const ClipDemo: FC<Props> = () => {
 
     const imgWidth = imgSize.width * imgScale;
     const imgHeight = imgSize.height * imgScale;
-    ctx.translate(width / 2, height / 2);
-    ctx.translate(-width / 2, -height / 2);
 
     ctx.drawImage(
       img,
       (width - imgWidth) / 2,
-      (height - imgHeight) / 2,
+      (height - imgHeight) / 2, // 居中
       imgWidth,
       imgHeight,
     );
     ctx.restore();
   }
-
+  /**
+   * 1. 利用URL.createObjectURL 创建本地图片url
+   * 2. 加载图片
+   * 3. 分配图片和canvas比例
+   * 4. 渲染图片
+   */
   function handleChoiseImg() {
     if (createURL) {
       window.URL.revokeObjectURL(createURL);
@@ -300,31 +337,7 @@ const ClipDemo: FC<Props> = () => {
     };
     img.src = createURL;
   }
-  const cancelChangeSelect = async () => {
-    // if (selectPosi.w < 0 || selectPosi.h < 0) {
-    //   // selectPosi = getAnewXY(selectPosi);
-    //   const { x, y, w, h } = selectPosi;
-    //   mousePosi = getMousePosi(x, y, w, h);
-    // }
 
-    // if (canChangeSelect) {
-    //   dataUrl && window.URL.revokeObjectURL(dataUrl);
-    //   const blob = (await getPhotoData({
-    //     imgSize,
-    //     rotate,
-    //     img,
-    //     canvasSize,
-    //     imgScale,
-    //     selectPosi,
-    //     grayscale,
-    //   })) as Blob;
-    //   const newDataUrl = window.URL.createObjectURL(blob);
-    //   setDataUrl(newDataUrl);
-    // }
-
-    canChangeSelect = false;
-    tempCursorIndex = null;
-  };
   return (
     <>
       <Layout

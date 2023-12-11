@@ -346,6 +346,15 @@ const ClipDemo: FC<Props> = () => {
     drawImage();
   }
 
+  function handleReset() {
+    grayscale = false;
+    rotate = 0;
+    initImage();
+    calcCanvasSize();
+    drawImage();
+    setDataUrl("");
+  }
+
   return (
     <>
       <Layout
@@ -393,14 +402,16 @@ const ClipDemo: FC<Props> = () => {
           <Button type="primary" onClick={handleGrayscale} ghost>
             灰度
           </Button>
-          {/*<Button type="primary" onClick={handleReset} ghost>*/}
-          {/*  重置*/}
-          {/*</Button>*/}
-          {/*<Button type="primary" ghost>*/}
-          {/*  <a href={dataUrl} download="canvas.png">*/}
-          {/*    下载*/}
-          {/*  </a>*/}
-          {/*</Button>*/}
+          <Button type="primary" onClick={handleReset} ghost>
+            重置
+          </Button>
+          {dataUrl ? (
+            <Button type="primary" ghost>
+              <a href={dataUrl} download="canvas.png">
+                下载
+              </a>
+            </Button>
+          ) : null}
         </OperationBox>
       </Layout>
     </>

@@ -11,6 +11,7 @@ import {
   getPixelRatio,
   handleMouseInfo,
 } from "./utils";
+import route from "../../router/route";
 
 const CanvasBox = styled.div`
   width: 500px;
@@ -102,7 +103,7 @@ let tempCursorIndex: number | null = null;
 let resetSelect: boolean = false;
 
 interface Props {}
-
+let rotate = 0;
 const ClipDemo: FC<Props> = () => {
   const canvasRef = useRef();
   const inputRef = useRef();
@@ -123,9 +124,16 @@ const ClipDemo: FC<Props> = () => {
   }
 
   function drawImage() {
-    const { width: canvasWidth, height: canvasHeight } = canvasSize;
+    let { width: canvasWidth, height: canvasHeight } = canvasSize;
     const { width: imgWidth, height: imgHeight } = imgSize;
+
     ctx.save();
+    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+    ctx.rotate((Math.PI / 180) * rotate);
+    if (rotate % 180 !== 0) {
+      [canvasHeight, canvasWidth] = [canvasWidth, canvasHeight];
+    }
+    ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
     ctx.globalCompositeOperation = "destination-over";
     ctx.drawImage(
       uploadImageELement,
@@ -139,11 +147,14 @@ const ClipDemo: FC<Props> = () => {
 
   function calcCanvasSize() {
     const { width: imageWidth, height: imageHeight } = imgSize;
-    const canvasRenderWidth = Math.min(imageWidth * imgScale, initSize.width);
-    const canvasRenderHeight = Math.min(
-      imageHeight * imgScale,
-      initSize.height,
-    );
+    let canvasRenderWidth = Math.min(imageWidth * imgScale, initSize.width);
+    let canvasRenderHeight = Math.min(imageHeight * imgScale, initSize.height);
+    if (rotate % 180 !== 0) {
+      [canvasRenderHeight, canvasRenderWidth] = [
+        canvasRenderWidth,
+        canvasRenderHeight,
+      ];
+    }
     canvasRef.current.style.width = `${canvasRenderWidth}px`;
     canvasRef.current.style.height = `${canvasRenderHeight}px`;
     canvasRef.current.width = ratio * canvasRenderWidth;
@@ -295,12 +306,23 @@ const ClipDemo: FC<Props> = () => {
         imgScale,
         selectPosi,
         canvasSize,
+        rotate,
       });
       const newUrl = window.URL.createObjectURL(photoData);
       setDataUrl(newUrl);
     }
     canChangeSelect = false;
     tempCursorIndex = null;
+  }
+  function handleRotate() {
+    rotate = rotate === 270 ? 0 : rotate + 90;
+    calcCanvasSize();
+    drawImage();
+  }
+  function handleScale(enLarge: boolean) {
+    imgScale += enLarge ? 1 : -1;
+    calcCanvasSize();
+    drawImage();
   }
   return (
     <>
@@ -331,21 +353,21 @@ const ClipDemo: FC<Props> = () => {
             />
             选择图片
           </Button>
-          {/*<div>*/}
-          {/*  <Button type="primary" onClick={handleScale.bind(null, true)} ghost>*/}
-          {/*    放大*/}
-          {/*  </Button>*/}
-          {/*  <Button*/}
-          {/*    type="primary"*/}
-          {/*    onClick={handleScale.bind(null, false)}*/}
-          {/*    ghost*/}
-          {/*  >*/}
-          {/*    缩小*/}
-          {/*  </Button>*/}
-          {/*</div>*/}
-          {/*<Button type="primary" onClick={handleRotate} ghost>*/}
-          {/*  旋转*/}
-          {/*</Button>*/}
+          <div>
+            <Button type="primary" onClick={handleScale.bind(null, true)} ghost>
+              放大
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleScale.bind(null, false)}
+              ghost
+            >
+              缩小
+            </Button>
+          </div>
+          <Button type="primary" onClick={handleRotate} ghost>
+            旋转
+          </Button>
           {/*<Button type="primary" onClick={handleGrayscale} ghost>*/}
           {/*  灰度*/}
           {/*</Button>*/}

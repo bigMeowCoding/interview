@@ -103,20 +103,45 @@ export function getPhotoData(option: {
   img: HTMLImageElement;
   canvasSize: ICanvasSize;
   imgScale: number;
+  rotate: number;
   selectPosi: ISelectPosi;
 }): Promise<Blob> {
-  const { imgSize, img, canvasSize, imgScale, selectPosi } = option;
-  console.log('option',option)
+  const { imgSize, img, rotate, canvasSize, imgScale, selectPosi } = option;
+  // console.log("option", option);
   const canvasEl = document.createElement("canvas");
-  canvasEl.width = imgSize.width;
-  canvasEl.height = imgSize.height;
   const ctx = canvasEl.getContext("2d");
-  ctx.drawImage(img, 0, 0, imgSize.width, imgSize.height);
+  // document.body.appendChild(canvasEl)
+  let { width: imgWidth, height: imgHeight } = imgSize;
+  if (rotate % 180 !== 0) {
+    [imgWidth, imgHeight] = [imgHeight, imgWidth];
+  }
+  canvasEl.width = imgWidth;
+  canvasEl.height = imgHeight;
+  ctx.save();
+  if (rotate % 180 !== 0) {
+    [imgWidth, imgHeight] = [imgHeight, imgWidth];
+  }
+  ctx.translate(canvasEl.width / 2, canvasEl.height / 2);
+  ctx.rotate((Math.PI / 180) * rotate);
+  ctx.drawImage(img, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+
+  // ctx.rect(0,0,100,100)
+  // ctx.strokeStyle='blue'
+  // ctx.stroke()
+
+  // console.log(-1*canvasEl.width  / 2, -1* canvasEl.height / 2,'t2')
+  // ctx.rect(0,0,200,200)
+  // ctx.strokeStyle='red'
+  // ctx.stroke()
+
+  ctx.restore();
+  if (rotate % 180 !== 0) {
+    [imgWidth, imgHeight] = [imgHeight, imgWidth];
+  }
   const putX =
-    (imgSize.width - canvasSize.width / imgScale) / 2 + selectPosi.x / imgScale;
+    (imgWidth - canvasSize.width / imgScale) / 2 + selectPosi.x / imgScale;
   const putY =
-    (imgSize.height - canvasSize.height / imgScale) / 2 +
-    selectPosi.y / imgScale;
+    (imgHeight - canvasSize.height / imgScale) / 2 + selectPosi.y / imgScale;
   const putW = selectPosi.w / imgScale;
   const putH = selectPosi.h / imgScale;
   const imgData = ctx.getImageData(putX, putY, putW, putH);

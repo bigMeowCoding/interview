@@ -122,8 +122,8 @@ const ClipDemo: FC<Props> = () => {
   function drawImage() {
     const { width: canvasWidth, height: canvasHeight } = canvasSize;
     const { width: imgWidth, height: imgHeight } = imgSize;
-    console.log(canvasWidth, canvasHeight, imgWidth, imgHeight, imgScale);
     ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
     ctx.drawImage(
       uploadImageELement,
       (canvasWidth - imgWidth * imgScale) / 2,
@@ -173,7 +173,6 @@ const ClipDemo: FC<Props> = () => {
   }
 
   function handleChoiseImg(event) {
-    console.log(event);
     if (uploadFileCreateURL) {
       window.URL.revokeObjectURL(uploadFileCreateURL); // 释放先前建立的URL
     }
@@ -187,10 +186,106 @@ const ClipDemo: FC<Props> = () => {
     };
   }
 
-  function mouseMove() {}
+  function checkInPath(posX: number, posY: number, mousePosiElement: number[]) {
+    ctx.beginPath();
+    // @ts-ignore
+    ctx.rect(...mousePosiElement);
 
-  function mouseDown() {}
-  function cancelChangeSelect() {}
+    const ret = ctx.isPointInPath(posX, posY);
+    ctx.closePath();
+    return ret;
+  }
+
+  function drawCover() {
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,.5)";
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+    ctx.globalCompositeOperation = "source-atop";
+    ctx.restore();
+  }
+
+  function drawSelect(x, y, w, h) {
+    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
+
+    drawCover();
+    ctx.save();
+    ctx.clearRect(x, y, w, h);
+    ctx.strokeStyle = "#5696f8";
+    ctx.strokeRect(x, y, w, h);
+    ctx.restore();
+    drawImage();
+
+    mousePosi = getMousePosi(x, y, w, h);
+    mousePosi.push([x, y, w, h]);
+  }
+
+  function mouseMove(e: React.MouseEvent) {
+    if (!ctx || !canvasRef.current) {
+      return;
+    }
+    console.log(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    let cursor = "crosshair";
+    cursorIndex = 9;
+    const posX = e.nativeEvent.offsetX,
+      posY = e.nativeEvent.offsetY;
+
+    // 1. 计算是从九个顶点哪个开始点击的，判断是什么操作，是在原来基础上拖拽还是重置，如果在操作点周围给cursorIndex
+    for (let i = 0; i < mousePosi.length; i++) {
+      if (checkInPath(posX * ratio, posY * ratio, mousePosi[i])) {
+        // cursor = getCursorStyle(i);
+        cursorIndex = i;
+        break;
+      }
+    }
+
+    canvasRef.current.style.cursor = cursor;
+    if (!canChangeSelect) {
+      return;
+    }
+    //2. 如果没被操作点捕捉到并且可以进行选项框操作就给默认index和初始点位
+    if (resetSelect) {
+      selectPosi = {
+        x: initMousePosi.x,
+        y: initMousePosi.y,
+        w: 4,
+        h: 4,
+      };
+      resetSelect = false;
+      tempCursorIndex = 2;
+    }
+
+    const pahX = posX - initMousePosi.x;
+    const pathY = posY - initMousePosi.y;
+    selectPosi = handleMouseInfo(
+      tempCursorIndex !== null ? tempCursorIndex : cursorIndex,
+      selectPosi,
+      { x: pahX, y: pathY },
+    );
+    // 3. 绘制选中框
+    drawSelect(selectPosi.x, selectPosi.y, selectPosi.w, selectPosi.h);
+    initMousePosi = {
+      x: posX,
+      y: posY,
+    };
+    if (tempCursorIndex === null) {
+      tempCursorIndex = cursorIndex;
+    }
+  }
+
+  function mouseDown(e: React.MouseEvent) {
+    if (cursorIndex === 9) {
+      resetSelect = true;
+    }
+    canChangeSelect = true;
+    initMousePosi = {
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY,
+    };
+  }
+  function cancelChangeSelect() {
+    canChangeSelect = false;
+    tempCursorIndex = null;
+  }
   return (
     <>
       <Layout

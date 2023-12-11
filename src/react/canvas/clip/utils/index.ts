@@ -104,9 +104,11 @@ export function getPhotoData(option: {
   canvasSize: ICanvasSize;
   imgScale: number;
   rotate: number;
+  grayscale: boolean;
   selectPosi: ISelectPosi;
 }): Promise<Blob> {
-  const { imgSize, img, rotate, canvasSize, imgScale, selectPosi } = option;
+  const { imgSize, grayscale, img, rotate, canvasSize, imgScale, selectPosi } =
+    option;
   // console.log("option", option);
   const canvasEl = document.createElement("canvas");
   const ctx = canvasEl.getContext("2d");
@@ -144,11 +146,25 @@ export function getPhotoData(option: {
     (imgHeight - canvasSize.height / imgScale) / 2 + selectPosi.y / imgScale;
   const putW = selectPosi.w / imgScale;
   const putH = selectPosi.h / imgScale;
-  const imgData = ctx.getImageData(putX, putY, putW, putH);
+  let imgData = ctx.getImageData(putX, putY, putW, putH);
+
+  if (grayscale) {
+    getGrayData(imgData);
+  }
   canvasEl.width = putW;
   canvasEl.height = putH;
   ctx.putImageData(imgData, 0, 0);
   return new Promise((res, rej) => {
     canvasEl.toBlob((e) => res(e));
   });
+}
+export function getGrayData(imageData:ImageData) {
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const grayScale = (data[i] + data[i + 1] * 2 + data[i + 2]) >> 2;
+    data[i] = grayScale;
+    data[i + 1] = grayScale;
+    data[i + 2] = grayScale;
+  }
+  return data;
 }

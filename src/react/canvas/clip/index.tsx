@@ -6,6 +6,7 @@ import { Button } from "antd";
 import {
   getAnewXY,
   getCursorStyle,
+  getGrayData,
   getMousePosi,
   getPhotoData,
   getPixelRatio,
@@ -76,6 +77,8 @@ let initSize = {} as {
   proportion: number;
 };
 let uploadImageELement: HTMLImageElement;
+let grayscale = false; //灰度
+
 export interface IImgSize {
   width: number;
   height: number;
@@ -142,6 +145,16 @@ const ClipDemo: FC<Props> = () => {
       imgWidth * imgScale,
       imgHeight * imgScale,
     );
+    if (grayscale) {
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvasSize.width * ratio,
+        canvasSize.height * ratio,
+      );
+      getGrayData(imageData);
+      ctx.putImageData(imageData, 0, 0);
+    }
     ctx.restore();
   }
 
@@ -306,6 +319,7 @@ const ClipDemo: FC<Props> = () => {
         imgScale,
         selectPosi,
         canvasSize,
+        grayscale,
         rotate,
       });
       const newUrl = window.URL.createObjectURL(photoData);
@@ -324,6 +338,14 @@ const ClipDemo: FC<Props> = () => {
     calcCanvasSize();
     drawImage();
   }
+
+  function handleGrayscale() {
+    grayscale = !grayscale;
+    mousePosi = [];
+    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
+    drawImage();
+  }
+
   return (
     <>
       <Layout
@@ -368,9 +390,9 @@ const ClipDemo: FC<Props> = () => {
           <Button type="primary" onClick={handleRotate} ghost>
             旋转
           </Button>
-          {/*<Button type="primary" onClick={handleGrayscale} ghost>*/}
-          {/*  灰度*/}
-          {/*</Button>*/}
+          <Button type="primary" onClick={handleGrayscale} ghost>
+            灰度
+          </Button>
           {/*<Button type="primary" onClick={handleReset} ghost>*/}
           {/*  重置*/}
           {/*</Button>*/}

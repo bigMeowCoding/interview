@@ -7,6 +7,7 @@ import {
   getAnewXY,
   getCursorStyle,
   getMousePosi,
+  getPhotoData,
   getPixelRatio,
   handleMouseInfo,
 } from "./utils";
@@ -66,10 +67,7 @@ let ratio: number;
 let mousePosi: number[][] = [];
 
 let ctx: CanvasRenderingContext2D;
-let canvasSize = {} as {
-  width: number;
-  height: number;
-};
+let canvasSize = {} as ICanvasSize;
 let uploadFileCreateURL = "";
 let initSize = {} as {
   width: number;
@@ -77,10 +75,15 @@ let initSize = {} as {
   proportion: number;
 };
 let uploadImageELement: HTMLImageElement;
-let imgSize = {} as {
+export interface IImgSize {
   width: number;
   height: number;
-};
+}
+export interface ICanvasSize {
+  width: number;
+  height: number;
+}
+let imgSize = {} as IImgSize;
 let imgScale: number; // 图片缩放比
 
 let selectPosi = {
@@ -282,7 +285,20 @@ const ClipDemo: FC<Props> = () => {
       y: e.nativeEvent.offsetY,
     };
   }
-  function cancelChangeSelect() {
+  async function cancelChangeSelect() {
+    if (canChangeSelect) {
+      dataUrl && window.URL.revokeObjectURL(dataUrl);
+
+      const photoData: Blob = await getPhotoData({
+        imgSize,
+        img: uploadImageELement,
+        imgScale,
+        selectPosi,
+        canvasSize,
+      });
+      const newUrl = window.URL.createObjectURL(photoData);
+      setDataUrl(newUrl);
+    }
     canChangeSelect = false;
     tempCursorIndex = null;
   }

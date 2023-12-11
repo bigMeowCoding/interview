@@ -1,4 +1,6 @@
-export type SelectPosi = {
+import { ICanvasSize, IImgSize } from "../index";
+
+export type ISelectPosi = {
   x: number;
   y: number;
   w: number;
@@ -33,7 +35,7 @@ export const getMousePosi = (x: number, y: number, w: number, h: number) => {
     [x - 4, y - 4, 8, h + 4],
   ];
 };
-export const getAnewXY = (select: SelectPosi) => {
+export const getAnewXY = (select: ISelectPosi) => {
   return {
     x: select.x + (select.w < 0 ? select.w : 0),
     y: select.y + (select.h < 0 ? select.h : 0),
@@ -47,7 +49,7 @@ export const getAnewXY = (select: SelectPosi) => {
  */
 export const handleMouseInfo = (
   i: number,
-  select: SelectPosi,
+  select: ISelectPosi,
   distance: Distance,
 ) => {
   const _select = { ...select };
@@ -95,3 +97,33 @@ export const handleMouseInfo = (
   return _select;
 };
 export const getCursorStyle = (i: number) => {};
+
+export function getPhotoData(option: {
+  imgSize: IImgSize;
+  img: HTMLImageElement;
+  canvasSize: ICanvasSize;
+  imgScale: number;
+  selectPosi: ISelectPosi;
+}): Promise<Blob> {
+  const { imgSize, img, canvasSize, imgScale, selectPosi } = option;
+  console.log('option',option)
+  const canvasEl = document.createElement("canvas");
+  canvasEl.width = imgSize.width;
+  canvasEl.height = imgSize.height;
+  const ctx = canvasEl.getContext("2d");
+  ctx.drawImage(img, 0, 0, imgSize.width, imgSize.height);
+  const putX =
+    (imgSize.width - canvasSize.width / imgScale) / 2 + selectPosi.x / imgScale;
+  const putY =
+    (imgSize.height - canvasSize.height / imgScale) / 2 +
+    selectPosi.y / imgScale;
+  const putW = selectPosi.w / imgScale;
+  const putH = selectPosi.h / imgScale;
+  const imgData = ctx.getImageData(putX, putY, putW, putH);
+  canvasEl.width = putW;
+  canvasEl.height = putH;
+  ctx.putImageData(imgData, 0, 0);
+  return new Promise((res, rej) => {
+    canvasEl.toBlob((e) => res(e));
+  });
+}

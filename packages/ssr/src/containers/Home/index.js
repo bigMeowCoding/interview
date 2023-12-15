@@ -1,9 +1,12 @@
-const React = require("react");
+import Navbar from "../../components/navbar";
+
+import React from "react";
 
 const Home = () => {
   return (
     <>
-      <h1>home</h1>
+      <Navbar />
+      <h2>home</h2>
       <button
         onClick={() => {
           alert("click");

@@ -9,6 +9,9 @@ module.exports = {
     a: "./src/index.js",
     b: "./src/main.js",
   },
+  cache: {
+    type: 'filesystem'
+  },
   devServer: {
     port: 3002,
   },

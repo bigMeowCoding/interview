@@ -3,6 +3,15 @@ import { expect, test, describe, it } from "vitest";
 import { compose } from "./index.js";
 
 describe("compose", () => {
+  it("one", () => {
+    function fn1(x) {
+      return x + 1;
+    }
+    const a = compose(fn1);
+    expect(a(1)).toBe(2);
+
+  });
+
   it("basic", () => {
     function fn1(x) {
       return x + 1;
@@ -18,5 +27,6 @@ describe("compose", () => {
     }
     const a = compose(fn1, fn2, fn3, fn4);
     expect(a(1)).toBe(11);
+
   });
 });

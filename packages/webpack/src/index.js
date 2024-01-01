@@ -1,8 +1,9 @@
-import clone from "lodash-es/clone";
-import _ from "lodash";
-import sum from "./sum";
-const obj = { a: 1 };
-let ret = clone(obj);
-console.log(ret);
-console.log(sum(2, 3));
-console.log(_.eq(obj, ret));
+function letTest() {
+    let x = 1;
+    if (true) {
+        let x = 2;  // 不同的变量
+        console.log(x);  // 2
+    }
+    console.log(x);  // 1
+}
+letTest()

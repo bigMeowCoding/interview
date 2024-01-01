@@ -24,23 +24,46 @@
   <body>
     <div id="root"></div>
     <!--    <pre id="fileContent"></pre>-->
-    <div id="image"></div>
-    <!--  <div id="div"></div>-->
-<div class="parent">
-  parent
-  <div class="child">child</div>
-</div>
-<!--        <script type="module" src="/src/basic/interval.js"></script>-->
-<!--    <script type="module" src="/src/file/file-reader-image.js"></script>-->
-    <script type="module" src="src/react/index.tsx"></script>
+    <div>
+        我是div
+    </div>
+    <template id="template">
+        <style>
+            div {
+                width: 100px;
+                height: 100px;
+                background: red;
+            }
+            .div1{
+                background: green;
+            }
+            .div2{
+                background: blue;
+            }
+        </style>
+        <div class="div1">
+            div1
+        </div>
+        <div class="div2">
+            div2
+        </div>
+    </template>
+    <my-template></my-template>    <my-template></my-template>
+
     <script>
-    // function wookloop(e) {
-    //   console.log(e && e.didTimeout,e&&e.timeRemaining())
-    //   requestIdleCallback(wookloop)
-    // }
-    // wookloop()
+       const content=  document.getElementById('template').content
+        class MyTemplate extends HTMLElement{
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                shadowRoot.appendChild(content.cloneNode(true))
+            }
+        }
+        customElements.define('my-template',MyTemplate)
     </script>
-<!--    <script type="module" src="/src/basic/requestIdleCallBackShim.js"></script>-->
-    <!--    <script type="module" src="/src/basic/ajax.ts"></script>-->
+    <div>
+        template
+    </div>
+    <script type="module" src="src/react/index.tsx"></script>
   </body>
 </html>

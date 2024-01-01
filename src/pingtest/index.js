@@ -6,7 +6,6 @@ const ping = function () {
 
 //现在需要你写一个pingTest方法，每隔5秒调用这个ping方法，在ping响应之前不会重复调用，
 // 并打印出每次ping方法响应的时间，并且这个pingTest方法返回一个abort方法，abort方法可以停止这个调用
-
 const pingTest = function (cb, ms = 5000) {
     let timer = null;
 

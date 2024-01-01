@@ -12,9 +12,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/preset-env": "^7.23.6",
+    "@statoscope/webpack-plugin": "^5.28.2",
     "html-webpack-plugin": "^5.5.4",
     "lodash-es": "^4.17.21",
+    "thread-loader": "^4.0.2",
     "webpack": "^5.89.0",
+    "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   }

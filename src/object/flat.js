@@ -2,18 +2,21 @@ function isObj(obj) {
   return typeof obj === "object" && obj !== null;
 }
 export function flatten(obj, parentKey = "", result = {}) {
-  if (Array.isArray(obj)) {
-    obj.forEach((value, key) => {
-      const newKey = parentKey ? `${parentKey}[${key}]` : key;
-      flatten(value, newKey, result);
-    });
-  } else if (isObj(obj)) {
-    for (let [key, value] of Object.entries(obj)) {
-      const newKey = parentKey ? `${parentKey}.${key}` : key;
-      flatten(value, newKey, result);
+  if (isObj(obj)) {
+    const keys = Object.keys(obj);
+    let newKey = "";
+    for (const key of keys) {
+      if (Array.isArray(obj)) {
+        newKey = parentKey ? `${parentKey}[${key}]` : key;
+      } else {
+        newKey = parentKey ? `${parentKey}.${key}` : key;
+      }
+       flatten(obj[key],newKey,result)
     }
   } else {
-    result[parentKey] = obj;
+    if (parentKey) {
+      result[parentKey] = obj;
+    }
   }
   return result;
 }

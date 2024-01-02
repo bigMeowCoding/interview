@@ -2,76 +2,70 @@ function isObject(value) {
   return value != null && typeof value === "object";
 }
 function getType(value) {
-  return Object.prototype.toString.call(value);
+  return Object.prototype.toString.apply(value, []);
 }
-const TAG = {
+const TYPE = {
+  number: "[object Number]",
+  string: "[object String]",
+  boolean: "[object Boolean]",
+  date: "[object Date]",
+  regexp: "[object RegExp]",
   map: "[object Map]",
   set: "[object Set]",
   array: "[object Array]",
-  obj: "[object Object]",
-  num: "[object Number]",
-  str: "[object String]",
-  boolean: "[object Boolean]",
-  regex: "[object RegExp]",
-  date: "[object Date]",
-  error:"[object Error]"
+  object: "[object Object]",
 };
-const canIterationTag = [TAG.set, TAG.map, TAG.array, TAG.obj];
 export function deepClone(value, map = new WeakMap()) {
-  function init(tag) {
-    switch (tag) {
-      case TAG.num:
-      case TAG.str:
-      case TAG.boolean:
+  function init(type) {
+    switch (type) {
+      case TYPE.boolean:
         return new value.constructor(value.valueOf());
-      case TAG.date:
-        return new value.constructor(value.getTime());
-      case TAG.error:
+      case TYPE.number:
+      case TYPE.string:
         return new value.constructor(value);
-      case TAG.map:
-      case TAG.set:
-      case TAG.array:
-        return new value.constructor();
-      case TAG.regex:
-        return new value.constructor(value.source, value.flags);
+      case TYPE.regexp:
+        return new RegExp(value.source, value.flags);
+      case TYPE.date:
+        return new Date(value.getTime());
+      case TYPE.map:
+        return new Map();
+      case TYPE.set:
+        return new Set();
+      case TYPE.array:
+        return [];
       default:
         return {};
     }
   }
-
+  const canIterType = [TYPE.map, TYPE.array, TYPE.set, TYPE.object];
   if (isObject(value)) {
     const type = getType(value);
-    console.log(type, "type");
+    const cloneObj = init(type);
     if (map.has(value)) {
       return map.get(value);
     }
-    const tag = getType(value);
-    const obj = init(tag);
-    map.set(value, obj);
-
-    if (canIterationTag.includes(tag)) {
-      if (tag === TAG.set) {
-        const values = value.values();
-        for (let value of values) {
-          obj.add(deepClone(value, map));
+    map.set(value, cloneObj);
+    if (canIterType.includes(type)) {
+      if (type === TYPE.set) {
+        for (const item of value) {
+          cloneObj.add(deepClone(item, map));
         }
-      } else if (tag === TAG.map) {
-        const keys = value.keys();
-        console.log("keys===", keys);
-        for (let key of keys) {
-          console.log("key", key, value.get(key));
-          obj.set(key, deepClone(value.get(key), map));
+      } else if (type === TYPE.map) {
+        for (const [key, item] of value) {
+          cloneObj.set(key, deepClone(item, map));
         }
+      } else if (type === TYPE.array) {
+        value.forEach((item) => {
+          cloneObj.push(deepClone(item, map));
+        });
       } else {
         const keys = Object.keys(value);
-        for (let key of keys) {
-          obj[key] = deepClone(value[key], map);
+        for (const key of keys) {
+          cloneObj[key] = deepClone(value[key], map);
         }
       }
     }
-
-
-    return obj;
+    return cloneObj;
   } else {
     return value;
   }

@@ -1,7 +1,7 @@
 {
   "name": "interview",
   "version": "1.0.0",
-  "description": "",
+  "description": "A repository for frontend interview preparation, including handwritten code implementation and LeetCode algorithm problems.",
   "main": "index.js",
   "type": "module",
   "scripts": {

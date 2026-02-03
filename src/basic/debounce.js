@@ -2,12 +2,15 @@
 // 则重新计时。这可以使用在一些点击请求的事件上，避免因为用户的多次点击向后端发送多次请求。
 function debounce(fn, delay) {
   let timer = null;
+  let that = this;
   return function () {
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      fn.apply(this, arguments);
+      fn.apply(that, arguments);
     }, delay);
   };
 }
+
+export default debounce;

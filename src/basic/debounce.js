@@ -3,30 +3,11 @@
 function debounce(fn, delay) {
   let timer = null;
   return function () {
-    const context = this,
-      args = arguments;
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      fn.apply(context, args);
+      fn.apply(this, arguments);
     }, delay);
   };
 }
-
-let count = 1;
-const debounceFn = debounce((a,b) => {
-    console.log("call", count);
-    console.log('sum',a+b)
-    count++;
-}, 1000);
-
-debounceFn(1,2);
-debounceFn(2,3);
-// setTimeout(() => {
-//   throttleFn();
-// }, 500);
-setTimeout(() => {
-    debounceFn(3,3);
-}, 500);
-

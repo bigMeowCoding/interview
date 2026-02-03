@@ -129,6 +129,74 @@ class MyPromise {
       resolve(x);
     }
   }
+  static resolve(value) {
+    if (value instanceof MyPromise) {
+      return value;
+    }
+    return new MyPromise((resolve) => resolve(value));
+  }
+  static reject(reason) {
+    return new MyPromise((resolve, reject) => reject(reason));
+  }
+  static all(promises) {
+    return new MyPromise((resolve, reject) => {
+      let count = 0;
+      let len = promises.length;
+      let result = [];
+      promises.forEach((promise, index) => {
+        MyPromise.resolve(promise).then(
+          (value) => {
+            result[index] = value;
+            count++;
+            if (count === len) {
+              resolve(result);
+            }
+          },
+          (reason) => {
+            reject(reason);
+          }
+        );
+      });
+    });
+  }
+  static race(promises) {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((promise) => {
+        MyPromise.resolve(promise).then(resolve, reject);
+      });
+    });
+  }
+  static allSettled(promises) {
+    return new MyPromise((resolve) => {
+      let count = 0;
+      let len = promises.length;
+      let result = [];
+      promises.forEach((promise, index) => {
+        MyPromise.resolve(promise).then(
+          (value) => {
+            result[index] = {
+              status: MyPromise.FULFILLED,
+              value,
+            };
+            count++;
+            if (count === len) {
+              resolve(result);
+            }
+          },
+          (error) => {
+            result[index] = {
+              status: MyPromise.REJECTED,
+              reason: error,
+            };
+            count++;
+            if (count === len) {
+              resolve(result);
+            }
+          }
+        );
+      });
+    });
+  }
 }
 
 export default MyPromise;

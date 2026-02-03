@@ -2,14 +2,14 @@ export function instanceOf(obj, func) {
   if (
     obj === null ||
     obj === undefined ||
-    typeof obj !== "object" ||
-    typeof func !== "function"
+    typeof func !== "function" ||
+    typeof obj !== "object"
   ) {
     return false;
   }
-  const prototype = func.prototype;
   let proto = Object.getPrototypeOf(obj);
-  while (proto !== null) {
+  const prototype = func.prototype;
+  while (proto) {
     if (proto === prototype) {
       return true;
     }

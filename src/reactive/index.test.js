@@ -1,6 +1,5 @@
-
 import { describe, it, expect, vi } from "vitest";
-import { reactive, effect } from "./index";
+import { reactive, effect, ref, computed } from "./index";
 
 describe("reactive", () => {
   it("should observe basic properties", () => {
@@ -43,7 +42,7 @@ describe("reactive", () => {
     let dummy;
     const obj = reactive({ run: true, text: "hello" });
     const fn = vi.fn(() => {
-        dummy = obj.run ? obj.text : "fallback";
+      dummy = obj.run ? obj.text : "fallback";
     });
     effect(fn);
 
@@ -63,12 +62,12 @@ describe("reactive", () => {
   it("should handle nested effects", () => {
     const nums = reactive({ num1: 0, num2: 10, num3: 100 });
     let dummy1, dummy2;
-    
+
     const childSpy = vi.fn(() => (dummy2 = nums.num2));
     const parentSpy = vi.fn(() => {
-        dummy1 = nums.num1;
-        effect(childSpy);
-        dummy1 += nums.num3; // access num3
+      dummy1 = nums.num1;
+      effect(childSpy);
+      dummy1 += nums.num3; // access num3
     });
 
     effect(parentSpy);
@@ -99,14 +98,129 @@ describe("reactive", () => {
     expect(parentSpy).toHaveBeenCalledTimes(3);
     expect(childSpy).toHaveBeenCalledTimes(5);
   });
-  
+
   it("should not cause infinite loop when modifying value inside effect", () => {
-      const obj = reactive({ foo: 1 });
+    const obj = reactive({ foo: 1 });
+    effect(() => {
+      obj.foo++;
+    });
+    // Should stop at some point (implementation dependent, usually handled by not triggering activeEffect)
+    // Our implementation does: if (effect !== activeEffect)
+    expect(obj.foo).toBe(2);
+  });
+});
+
+describe("ref", () => {
+  it("should hold a value", () => {
+    const a = ref(1);
+    expect(a.value).toBe(1);
+    a.value = 2;
+    expect(a.value).toBe(2);
+  });
+
+  it("should be reactive", () => {
+    const a = ref(1);
+    let dummy;
+    let calls = 0;
+    effect(() => {
+      calls++;
+      dummy = a.value;
+    });
+    expect(calls).toBe(1);
+    expect(dummy).toBe(1);
+    a.value = 2;
+    expect(calls).toBe(2);
+    expect(dummy).toBe(2);
+    // same value should not trigger
+    a.value = 2;
+    expect(calls).toBe(2);
+    expect(dummy).toBe(2);
+  });
+
+  it("should work with nested effects", () => {
+    const a = ref(1);
+    const b = ref(2);
+    let dummy1, dummy2;
+
+    effect(() => {
+      dummy1 = a.value;
       effect(() => {
-          obj.foo++;
+        dummy2 = b.value;
       });
-      // Should stop at some point (implementation dependent, usually handled by not triggering activeEffect)
-      // Our implementation does: if (effect !== activeEffect)
-      expect(obj.foo).toBe(2);
+    });
+
+    expect(dummy1).toBe(1);
+    expect(dummy2).toBe(2);
+
+    a.value = 3;
+    expect(dummy1).toBe(3);
+    expect(dummy2).toBe(2);
+
+    b.value = 4;
+    expect(dummy1).toBe(3);
+    expect(dummy2).toBe(4);
+  });
+});
+
+describe("computed", () => {
+  it("should return updated value", () => {
+    const value = reactive({ foo: 1 });
+    const cValue = computed(() => value.foo);
+    expect(cValue.value).toBe(1);
+    value.foo = 2;
+    expect(cValue.value).toBe(2);
+  });
+
+  it("should compute lazily", () => {
+    const value = reactive({ foo: 1 });
+    const getter = vi.fn(() => value.foo);
+    const cValue = computed(getter);
+
+    // lazy
+    expect(getter).not.toHaveBeenCalled();
+
+    expect(cValue.value).toBe(1);
+    expect(getter).toHaveBeenCalledTimes(1);
+
+    // should not compute again
+    cValue.value;
+    expect(getter).toHaveBeenCalledTimes(1);
+
+    // should not compute until needed
+    value.foo = 2;
+    expect(getter).toHaveBeenCalledTimes(1);
+
+    // now it should compute
+    expect(cValue.value).toBe(2);
+    expect(getter).toHaveBeenCalledTimes(2);
+
+    // should not compute again
+    cValue.value;
+    expect(getter).toHaveBeenCalledTimes(2);
+  });
+
+  it("should trigger effect", () => {
+    const value = reactive({ foo: 1 });
+    const cValue = computed(() => value.foo);
+    let dummy;
+    effect(() => {
+      dummy = cValue.value;
+    });
+    expect(dummy).toBe(1);
+    value.foo = 2;
+    expect(dummy).toBe(2);
+  });
+
+  it("should work when chained", () => {
+    const value = reactive({ foo: 0 });
+    const c1 = computed(() => value.foo);
+    const c2 = computed(() => c1.value + 1);
+
+    expect(c2.value).toBe(1);
+    expect(c1.value).toBe(0);
+
+    value.foo++;
+    expect(c2.value).toBe(2);
+    expect(c1.value).toBe(1);
   });
 });

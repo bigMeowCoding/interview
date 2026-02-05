@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "test": "vitest"
+    "test": "vitest src/reactive/index.test.js"
   },
   "keywords": [],
   "author": "",

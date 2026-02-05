@@ -26,7 +26,11 @@ export function trigger(target, key) {
   const effectsToRun = new Set(dep);
   effectsToRun.forEach((effect) => {
     if (effect !== activeEffect) {
-      effect();
+      if (effect.scheduler) {
+        effect.scheduler();
+      } else {
+        effect();
+      }
     }
   });
 }
@@ -52,7 +56,7 @@ export function reactive(target) {
   });
 }
 
-export function effect(fn) {
+export function effect(fn, options = {}) {
   const effectFn = () => {
     cleanUp(effectFn);
     activeEffect = effectFn;
@@ -65,7 +69,12 @@ export function effect(fn) {
     }
   };
   effectFn.deps = [];
-  effectFn();
+  effectFn.scheduler = options.scheduler;
+
+  if (!options.lazy) {
+    effectFn();
+  }
+
   return effectFn;
 }
 
@@ -88,6 +97,30 @@ export function ref(value) {
         this._value = newValue;
         trigger(wrapper, "value");
       }
+    },
+  };
+  return wrapper;
+}
+
+export function computed(getter) {
+  let dirty = true;
+  let value;
+  const runner = effect(getter, {
+    lazy: true,
+    scheduler: () => {
+      dirty = true;
+      trigger(wrapper, "value");
+    },
+  });
+
+  const wrapper = {
+    get value() {
+      track(wrapper, "value");
+      if (dirty) {
+        value = runner();
+        dirty = false;
+      }
+      return value;
     },
   };
   return wrapper;

@@ -23,7 +23,8 @@ export function trigger(target, key) {
   if (!depsMap) return;
   const dep = depsMap.get(key);
   if (!dep) return;
-  dep.forEach((effect) => {
+  const effectsToRun = new Set(dep);
+  effectsToRun.forEach((effect) => {
     if (effect !== activeEffect) {
       effect();
     }
@@ -73,4 +74,21 @@ export function cleanUp(effectFn) {
     dep.delete(effectFn);
   });
   effectFn.deps.length = 0;
+}
+
+export function ref(value) {
+  const wrapper = {
+    _value: value,
+    get value() {
+      track(wrapper, "value");
+      return this._value;
+    },
+    set value(newValue) {
+      if (newValue !== this._value) {
+        this._value = newValue;
+        trigger(wrapper, "value");
+      }
+    },
+  };
+  return wrapper;
 }

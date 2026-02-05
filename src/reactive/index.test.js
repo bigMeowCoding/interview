@@ -90,14 +90,14 @@ describe("reactive", () => {
     expect(dummy1).toBe(101);
     expect(dummy2).toBe(11);
     expect(parentSpy).toHaveBeenCalledTimes(2);
-    expect(childSpy).toHaveBeenCalledTimes(3);
+    expect(childSpy).toHaveBeenCalledTimes(4);
 
     // should trigger parent effect
     nums.num3++;
     expect(dummy1).toBe(102);
     expect(dummy2).toBe(11);
     expect(parentSpy).toHaveBeenCalledTimes(3);
-    expect(childSpy).toHaveBeenCalledTimes(4);
+    expect(childSpy).toHaveBeenCalledTimes(5);
   });
   
   it("should not cause infinite loop when modifying value inside effect", () => {

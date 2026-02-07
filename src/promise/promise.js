@@ -11,20 +11,16 @@ class MyPromise {
     this.onRejectedCallbacks = [];
 
     const resolve = (value) => {
-      if (this.status !== MyPromise.PENDING) {
-        return;
-      }
+      if (this.status !== MyPromise.PENDING) return;
       this.status = MyPromise.FULFILLED;
       this.value = value;
-      this.onFulfilledCallbacks.forEach((fn) => fn(this.value));
+      this.onFulfilledCallbacks.forEach((callback) => callback(this.value));
     };
-    const reject = (error) => {
-      if (this.status !== MyPromise.PENDING) {
-        return;
-      }
+    const reject = (reason) => {
+      if (this.status !== MyPromise.PENDING) return;
       this.status = MyPromise.REJECTED;
-      this.reason = error;
-      this.onRejectedCallbacks.forEach((fn) => fn(this.reason));
+      this.reason = reason;
+      this.onRejectedCallbacks.forEach((callback) => callback(this.reason));
     };
     try {
       executor(resolve, reject);
@@ -33,20 +29,19 @@ class MyPromise {
     }
   }
   then(onFulfilled, onRejected) {
-    onFulfilled =
-      typeof onFulfilled === "function" ? onFulfilled : (value) => value;
+    onFulfilled = typeof onFulfilled === "function" ? onFulfilled : (v) => v;
     onRejected =
       typeof onRejected === "function"
         ? onRejected
-        : (reason) => {
-            throw reason;
+        : (r) => {
+            throw r;
           };
-    const promise2 = new MyPromise((resolve, reject) => {
+    let _promise = new MyPromise((resolve, reject) => {
       if (this.status === MyPromise.FULFILLED) {
         setTimeout(() => {
           try {
-            const x = onFulfilled(this.value);
-            this.resolvePromise(promise2, x, resolve, reject);
+            let ret = onFulfilled(this.value);
+            this.resolvePromise(_promise, ret, resolve, reject);
           } catch (error) {
             reject(error);
           }
@@ -54,8 +49,8 @@ class MyPromise {
       } else if (this.status === MyPromise.REJECTED) {
         setTimeout(() => {
           try {
-            const x = onRejected(this.reason);
-            this.resolvePromise(promise2, x, resolve, reject);
+            let ret = onRejected(this.reason);
+            this.resolvePromise(_promise, ret, resolve, reject);
           } catch (error) {
             reject(error);
           }
@@ -64,8 +59,8 @@ class MyPromise {
         this.onFulfilledCallbacks.push(() => {
           setTimeout(() => {
             try {
-              const x = onFulfilled(this.value);
-              this.resolvePromise(promise2, x, resolve, reject);
+              let ret = onFulfilled(this.value);
+              this.resolvePromise(_promise, ret, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -74,8 +69,8 @@ class MyPromise {
         this.onRejectedCallbacks.push(() => {
           setTimeout(() => {
             try {
-              const x = onRejected(this.reason);
-              this.resolvePromise(promise2, x, resolve, reject);
+              let ret = onRejected(this.reason);
+              this.resolvePromise(_promise, ret, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -83,134 +78,53 @@ class MyPromise {
         });
       }
     });
-    return promise2;
+    return _promise;
   }
-  resolvePromise(promise2, x, resolve, reject) {
-    if (promise2 === x) {
-      return reject(new TypeError("Chaining cycle detected for promise"));
+  resolvePromise(promise, value, resolve, reject) {
+    if (promise === value) {
+      throw new TypeError("Chaining cycle detected for promise");
     }
-    if (x instanceof MyPromise) {
-      if (x.status === MyPromise.PENDING) {
-        x.then(
-          (value) => {
-            this.resolvePromise(promise2, value, resolve, reject);
-          },
-          (reason) => {
-            reject(reason);
-          }
+    if (value instanceof MyPromise) {
+      if (value.status === MyPromise.PENDING) {
+        value.then(
+          (v) => this.resolvePromise(promise, v, resolve, reject),
+          reject
         );
       } else {
-        x.then(resolve, reject);
+        value.then(resolve, reject);
       }
     } else if (
-      x !== null &&
-      (typeof x === "object" || typeof x === "function")
+      (typeof value === "object" || typeof value === "function") &&
+      value !== null
     ) {
       let called = false;
       try {
-        const then = x.then;
+        let then = value.then;
         if (typeof then === "function") {
           then.call(
-            x,
-            (value) => {
-              if (called) {
-                return;
-              }
+            value,
+            (v) => {
+              if (called) return;
               called = true;
-              this.resolvePromise(promise2, value, resolve, reject);
+              this.resolvePromise(promise, v, resolve, reject);
             },
-            (reason) => {
-              if (called) {
-                return;
-              }
+            (r) => {
+              if (called) return;
               called = true;
-              reject(reason);
+              reject(r);
             }
           );
         } else {
-          resolve(x);
+          resolve(value);
         }
       } catch (error) {
-        if (called) {
-          return;
-        }
+        if (called) return;
         called = true;
         reject(error);
       }
-      let then = x.then;
     } else {
-      resolve(x);
-    }
-  }
-  static resolve(value) {
-    if (value instanceof MyPromise) {
-      return value;
-    }
-    return new MyPromise((resolve) => {
       resolve(value);
-    });
-  }
-  static reject(reason) {
-    return new MyPromise((_, reject) => {
-      reject(reason);
-    });
-  }
-  static all(promises) {
-    return new MyPromise((resolve, reject) => {
-      const results = [];
-      let count = 0;
-      promises.forEach((promise, index) => {
-        MyPromise.resolve(promise).then(
-          (value) => {
-            results[index] = value;
-            count++;
-            if (count === promises.length) {
-              resolve(results);
-            }
-          },
-          (reason) => {
-            reject(reason);
-          }
-        );
-      });
-    });
-  }
-  static race(promises) {
-    return new MyPromise((resolve, reject) => {
-      promises.forEach((promise) => {
-        MyPromise.resolve(promise).then(resolve, reject);
-      });
-    });
-  }
-  static allSettled(promises) {
-    return new MyPromise((resolve, reject) => {
-      let result = [];
-      let count = 0;
-      promises.forEach((promise, index) => {
-        MyPromise.resolve(promise).then(
-          (value) => {
-            result[index] = {
-              status: MyPromise.FULFILLED,
-              value,
-            };
-            count++;
-            if (count === promises.length) {
-              resolve(result);
-            }
-          },
-          (reason) => {
-            result[index] = {
-              status: MyPromise.REJECTED,
-              reason,
-            };
-            count++;
-            if (count === promises.length) {
-              resolve(result);
-            }
-          }
-        );
-      });
-    });
+    }
   }
 }
 

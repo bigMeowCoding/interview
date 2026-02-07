@@ -68,7 +68,9 @@ describe("MyPromise", () => {
             setTimeout(() => resolve(val + 1), 10);
           });
         })
-        .then((val) => val + 2)
+        .then((val) => {
+          return val + 2;
+        })
         .then(r)
     );
     expect(result).toBe(4);

@@ -1,3 +1,5 @@
+import { ModuleFilenameHelpers } from "webpack";
+
 let targetMap = new WeakMap();
 let activeEffect = null;
 let effectStack = [];
@@ -75,6 +77,7 @@ export function effect(fn, options = {}) {
   if (!options.lazy) {
     effectFn();
   }
+  return effectFn;
 }
 
 export function cleanup(effect) {
@@ -82,4 +85,43 @@ export function cleanup(effect) {
     dep.delete(effect);
   });
   effect.deps.length = 0;
+}
+
+export function ref(value) {
+  let wrapper = {
+    _value: value,
+    get value() {
+      track(wrapper, "value");
+      return this._value;
+    },
+    set value(param) {
+      if (param !== this.value) {
+        this._value = param;
+        trigger(wrapper, "value");
+      }
+    },
+  };
+  return wrapper;
+}
+export function computed(getter) {
+  let dirty = true;
+  let value = null;
+  const runner = effect(getter, {
+    lazy: true,
+    schedule: () => {
+      dirty = true;
+      trigger(wrapper, "value");
+    },
+  });
+  let wrapper = {
+    get value() {
+      if (dirty) {
+        value = runner();
+        dirty = false;
+      }
+      track(wrapper, "value");
+      return value;
+    },
+  };
+  return wrapper;
 }

@@ -1,4 +1,4 @@
-const targetMap = new WeakMap();
+let targetMap = new WeakMap();
 let activeEffect = null;
 let effectStack = [];
 
@@ -16,27 +16,21 @@ export function track(target, key) {
     deps = new Set();
     depsMap.set(key, deps);
   }
-
   deps.add(activeEffect);
+
   activeEffect.deps.push(deps);
 }
 
 export function trigger(target, key) {
-  let depsMap = targetMap.get(target);
-  if (!depsMap) {
-    return;
-  }
+  const depsMap = targetMap.get(target);
+  if (!depsMap) return;
   const deps = depsMap.get(key);
-  if (!deps) {
-    return;
-  }
+  if (!deps) return;
   const set = new Set(deps);
   set.forEach((effect) => {
-    if (effect === activeEffect) {
-      return;
-    }
-    if (effect.options.scheduler) {
-      effect.options.scheduler();
+    if (effect === activeEffect) return;
+    if (effect.options.schedule) {
+      effect.options.schedule();
     } else {
       effect();
     }
@@ -55,11 +49,11 @@ export function reactive(target) {
     },
     set(target, key, value, receiver) {
       const oldValue = Reflect.get(target, key, receiver);
-      const result = Reflect.set(target, key, value, receiver);
+      let ret = Reflect.set(target, key, value, receiver);
       if (oldValue !== value) {
         trigger(target, key);
       }
-      return result;
+      return ret;
     },
   });
 }
@@ -68,7 +62,7 @@ export function effect(fn, options = {}) {
   const effectFn = () => {
     cleanup(effectFn);
     activeEffect = effectFn;
-    effectStack.push(effectFn);
+    effectStack.push(activeEffect);
     try {
       return fn();
     } finally {
@@ -76,56 +70,16 @@ export function effect(fn, options = {}) {
       activeEffect = effectStack[effectStack.length - 1] || null;
     }
   };
-  effectFn.deps = [];
   effectFn.options = options;
+  effectFn.deps = [];
   if (!options.lazy) {
     effectFn();
   }
-  return effectFn;
-}
-export function cleanup(effect) {
-  effect.deps.forEach((set) => {
-    set.delete(effect);
-  });
-  effect.deps.length = 0;
 }
 
-export function ref(value) {
-  const wrapper = {
-    _value: value,
-    get value() {
-      track(wrapper, "value");
-      return this._value;
-    },
-    set value(newValue) {
-      if (newValue === this._value) return;
-      this._value = newValue;
-      trigger(wrapper, "value");
-    },
-  };
-  return wrapper;
-}
-export function computed(getter) {
-  let dirty = true;
-  let value = null;
-  const runner = effect(getter, {
-    lazy: true,
-    scheduler: () => {
-      if (!dirty) {
-        dirty = true;
-        trigger(wrapper, "value");
-      }
-    },
+export function cleanup(effect) {
+  effect.deps.forEach((dep) => {
+    dep.delete(effect);
   });
-  const wrapper = {
-    get value() {
-      if (dirty) {
-        value = runner();
-        dirty = false;
-      }
-      track(wrapper, "value");
-      return value;
-    },
-  };
-  return wrapper;
+  effect.deps.length = 0;
 }

@@ -49,49 +49,47 @@ export default class MyPromise {
             throw error;
           };
     let promise = new MyPromise((resolve, reject) => {
+      const runMicrotask = (fn) => {
+        queueMicrotask(() => {
+          try {
+            fn();
+          } catch (e) {
+            reject(e);
+          }
+        });
+      };
       if (this.status === MyPromise.FULFILLED) {
-        setTimeout(() => {
-          try {
-            const x = onFulfilled(this.value);
-            this.resolvePromise(promise, x, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        }, 0);
+        runMicrotask(() => {
+          const x = onFulfilled(this.value);
+          this.resolvePromise(promise, x, resolve, reject);
+        });
       } else if (this.status === MyPromise.REJECTED) {
-        setTimeout(() => {
-          try {
-            const x = onRejected(this.reason);
-            this.resolvePromise(promise, x, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        }, 0);
+        runMicrotask(() => {
+          const x = onRejected(this.reason);
+          this.resolvePromise(promise, x, resolve, reject);
+        });
       } else {
         this.fulfilledCallbackList.push(() => {
-          setTimeout(() => {
-            try {
-              const x = onFulfilled(this.value);
-              this.resolvePromise(promise, x, resolve, reject);
-            } catch (e) {
-              reject(e);
-            }
-          }, 0);
+          runMicrotask(() => {
+            const x = onFulfilled(this.value);
+            this.resolvePromise(promise, x, resolve, reject);
+          });
         });
         this.rejectedCallbackList.push(() => {
-          setTimeout(() => {
-            try {
-              const x = onRejected(this.reason);
-              this.resolvePromise(promise, x, resolve, reject);
-            } catch (e) {
-              reject(e);
-            }
-          }, 0);
+          runMicrotask(() => {
+            const x = onRejected(this.reason);
+            this.resolvePromise(promise, x, resolve, reject);
+          });
         });
       }
     });
     return promise;
   }
+
+  catch(onRejected) {
+    return this.then(null, onRejected);
+  }
+
   resolvePromise(promise, x, resolve, reject) {
     if (promise === x) {
       throw new TypeError("Chaining cycle");

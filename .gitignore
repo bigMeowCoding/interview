@@ -1,5 +1,6 @@
 .idea
 /node_modules
+**/node_modules/.vitest/
 pnpm-lock.yaml
 /packages/*/node_modules/
 /packages/webpack/dist/

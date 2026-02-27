@@ -1,0 +1,15 @@
+.rect {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #10b981;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+.child {
+  background: #f59e0b;
+  padding-top: 75%;
+  height: 0;
+}
+.parent {
+  width: 400px;
+}

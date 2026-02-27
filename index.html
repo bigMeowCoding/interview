@@ -1,69 +1,17 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    
+<meta charset="UTF-8" />
     <title>Title</title>
     <link rel="stylesheet" href="index.css" />
-    <style>
-      .parent {
-        background: yellow;
-        /*opacity: 0;*/
-        visibility: hidden;
-      }
-      .parent,.child {
-        width:200px;
-        height:200px
-      }
-      .child {
-        /*visibility: visible;*/
-        /*opacity: 1;*/
-        background: red;
-      }
-    </style>
+  
   </head>
   <body>
     <div id="root"></div>
     <!--    <pre id="fileContent"></pre>-->
-    <div>
-        我是div
-    </div>
-    <template id="template">
-        <style>
-            div {
-                width: 100px;
-                height: 100px;
-                background: red;
-            }
-            .div1{
-                background: green;
-            }
-            .div2{
-                background: blue;
-            }
-        </style>
-        <div class="div1">
-            div1
-        </div>
-        <div class="div2">
-            div2
-        </div>
-    </template>
-    <my-template></my-template>    <my-template></my-template>
 
-    <script>
-       const content=  document.getElementById('template').content
-        class MyTemplate extends HTMLElement{
-            constructor() {
-                super();
-                const shadowRoot = this.attachShadow({mode: 'open'});
-                shadowRoot.appendChild(content.cloneNode(true))
-            }
-        }
-        customElements.define('my-template',MyTemplate)
-    </script>
-    <div>
-        template
-    </div>
+
     <script type="module" src="src/react/index.tsx"></script>
   </body>
 </html>

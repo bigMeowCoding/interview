@@ -137,4 +137,72 @@ export default class MyPromise {
       resolve(x);
     }
   }
+  static resolve(value) {
+    if (value instanceof MyPromise) {
+      return value;
+    }
+    return new MyPromise((resolve) => {
+      resolve(value);
+    });
+  }
+  static reject(reason) {
+    return new MyPromise((_, reject) => {
+      reject(reason);
+    });
+  }
+  static race(promises) {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((promise) => {
+        promise.then(resolve, reject);
+      });
+    });
+  }
+
+  static all(promises) {
+    let ret = [];
+    let count = 0;
+    return new MyPromise((resolve, reject) => {
+      if (promises.length === 0) {
+        resolve(ret);
+        return;
+      }
+      promises.forEach((p, index) => {
+        MyPromise.resolve(p).then(
+          (val) => {
+            ret[index] = val;
+            count++;
+            if (count === promises.length) {
+              resolve(ret);
+            }
+          },
+          reject
+        );
+      });
+    });
+  }
+
+  static allSettled(promises) {
+    let ret = [];
+    let count = 0;
+    return new MyPromise((resolve) => {
+      if (promises.length === 0) {
+        resolve(ret);
+        return;
+      }
+      promises.forEach((p, index) => {
+        MyPromise.resolve(p).then(
+          (val) => {
+            ret[index] = { status: "fulfilled", value: val };
+            count++;
+            if (count === promises.length) resolve(ret);
+          },
+          (reason) => {
+            ret[index] = { status: "rejected", reason };
+            count++;
+            if (count === promises.length) resolve(ret);
+          }
+        );
+      });
+    });
+  }
 }

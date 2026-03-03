@@ -1,7 +1,7 @@
 export default class MyPromise {
   static PENDING = "pending";
   static FULFILLED = "fulfilled";
-  static REJECTED = "reject";
+  static REJECTED = "rejected";
 
   constructor(executor) {
     this.status = MyPromise.PENDING;
@@ -10,10 +10,50 @@ export default class MyPromise {
     this.fulfilledCallbackList = [];
     this.rejectedCallbackList = [];
 
-    const resolve = (value) => {
-      if (this.status !== MyPromise.PENDING) {
-        return;
+    let isCalled = false;
+
+    const _resolve = (value) => {
+      if (this.status !== MyPromise.PENDING) return;
+
+      if (value === this) {
+        return _reject(new TypeError("Chaining cycle"));
       }
+
+      if (
+        value &&
+        (typeof value === "object" || typeof value === "function")
+      ) {
+        let then;
+        try {
+          then = value.then;
+        } catch (e) {
+          return _reject(e);
+        }
+
+        if (typeof then === "function") {
+          let called = false;
+          try {
+            then.call(
+              value,
+              (y) => {
+                if (called) return;
+                called = true;
+                _resolve(y);
+              },
+              (r) => {
+                if (called) return;
+                called = true;
+                _reject(r);
+              }
+            );
+          } catch (e) {
+            if (called) return;
+            _reject(e);
+          }
+          return;
+        }
+      }
+
       this.status = MyPromise.FULFILLED;
       this.value = value;
       this.fulfilledCallbackList.forEach((cb) => {
@@ -21,7 +61,7 @@ export default class MyPromise {
       });
     };
 
-    const reject = (reason) => {
+    const _reject = (reason) => {
       if (this.status !== MyPromise.PENDING) {
         return;
       }
@@ -30,6 +70,18 @@ export default class MyPromise {
       this.rejectedCallbackList.forEach((cb) => {
         cb(reason);
       });
+    };
+
+    const resolve = (value) => {
+      if (isCalled) return;
+      isCalled = true;
+      _resolve(value);
+    };
+
+    const reject = (reason) => {
+      if (isCalled) return;
+      isCalled = true;
+      _reject(reason);
     };
 
     try {
@@ -90,9 +142,22 @@ export default class MyPromise {
     return this.then(null, onRejected);
   }
 
+  finally(onFinally) {
+    return this.then(
+      (value) => {
+        return MyPromise.resolve(onFinally()).then(() => value);
+      },
+      (reason) => {
+        return MyPromise.resolve(onFinally()).then(() => {
+          throw reason;
+        });
+      }
+    );
+  }
+
   resolvePromise(promise, x, resolve, reject) {
     if (promise === x) {
-      throw new TypeError("Chaining cycle");
+      return reject(new TypeError("Chaining cycle"));
     }
     if (x instanceof MyPromise) {
       if (x.status === MyPromise.PENDING) {

@@ -297,4 +297,69 @@ describe("MyPromise", () => {
       });
     });
   });
+
+  describe("Promise A+ Compliance & Edge Cases", () => {
+    it("should unwrap thenable passed to resolve in constructor", () => {
+      return new MyPromise((resolve) => {
+        resolve({
+          then: (r) => setTimeout(() => r(42), 10),
+        });
+      }).then((val) => {
+        expect(val).toBe(42);
+      });
+    });
+
+    it("should catch exception when accessing x.then getter", () => {
+      const error = new Error("getter error");
+      const obj = Object.defineProperty({}, "then", {
+        get: () => {
+          throw error;
+        },
+      });
+
+      const promise = new MyPromise((resolve) => resolve(1));
+      return promise
+        .then(() => obj)
+        .then(
+          () => {
+            throw new Error("should not be fulfilled");
+          },
+          (err) => {
+            expect(err).toBe(error);
+          }
+        );
+    });
+
+    it("MyPromise.resolve should unwrap thenable", () => {
+      const thenable = {
+        then: (r) => r(42),
+      };
+      return MyPromise.resolve(thenable).then((val) => {
+        expect(val).toBe(42);
+      });
+    });
+
+    it("should ignore subsequent resolve/reject calls when resolving a thenable", () => {
+      let resolveThenable;
+      const thenable = {
+        then: (r) => {
+          resolveThenable = r;
+        },
+      };
+
+      const p = new MyPromise((resolve, reject) => {
+        resolve(thenable);
+        resolve(2);
+        reject("error");
+      });
+
+      setTimeout(() => {
+        resolveThenable(1);
+      }, 10);
+
+      return p.then((val) => {
+        expect(val).toBe(1);
+      });
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import React, { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import RouterDemo from "./router";
 // import HashRouterDemo from "./router/hash-index";
@@ -8,8 +8,10 @@ import RouterDemo from "./router";
 // import Counter from "./counter";
 // import CounterDown from "./counter-down";
 
+
 const rootEl = document.getElementById("root");
 const root = createRoot(rootEl);
+
 
 root.render(
   <>

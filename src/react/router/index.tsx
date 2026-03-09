@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FC } from "react";
-import Router from "./router";
-import Route from "./route";
-import Link from "./link";
+import { useRef } from "react";
 import "./style.css";
 interface Props {}
-const Home = () => <h2>Home context</h2>;
-const About = () => <h2>About context</h2>;
+
 const RouterDemo: FC<Props> = () => {
   // return <div className="rect">rect</div>;
+  const count = useRef(0);
+  useEffect(() => {
+    console.log("ddd");
+    alert(count.current);
+  }, [count.current]);
   return (
-    <div className="parent">
-      <div className="child">rect</div>
+    <div
+      className="parent"
+      onClick={() => console.log("click", count.current++)}
+    >
+      {count.current}
     </div>
   );
 };

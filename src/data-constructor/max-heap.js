@@ -20,17 +20,17 @@ export class MaxHeap {
 
   insert(val) {
     this.heap.push(val);
-    this.shiftUp(this.heap[this.size() - 1]);
+    this.shiftUp(this.size() - 1);
   }
   pop() {
     if (this.size() === 0) return null;
-    const top = this.heap[0];
-
     if (this.size() === 1) {
-      return top;
+      return this.heap.pop();
     }
     this.swap(0, this.size() - 1);
+    const top = this.heap.pop();
     this.shiftDown(0);
+    return top;
   }
   shiftUp(index) {
     while (index > 0) {
@@ -44,14 +44,21 @@ export class MaxHeap {
     }
   }
   shiftDown(index) {
+    const len = this.heap.length;
     while (true) {
       let biggestIndex = index;
       let leftChildIndex = this.getLeftChildIndex(index);
-      if (this.heap[leftChildIndex] > this.heap[biggestIndex]) {
+      if (
+        leftChildIndex < len &&
+        this.heap[leftChildIndex] > this.heap[biggestIndex]
+      ) {
         biggestIndex = leftChildIndex;
       }
       let rightChildIndex = this.getRightChildIndex(index);
-      if (this.heap[rightChildIndex] > this.heap[biggestIndex]) {
+      if (
+        rightChildIndex < len &&
+        this.heap[rightChildIndex] > this.heap[biggestIndex]
+      ) {
         biggestIndex = rightChildIndex;
       }
       if (biggestIndex === index) {

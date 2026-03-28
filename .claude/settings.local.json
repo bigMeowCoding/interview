@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(find /Users/zhouyijun/.claude/plugins/cache/planning-with-files -name \"INSTALL*\" -o -name \"install*\" 2>/dev/null | head -5)"
+    ]
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": false
+  }
+}

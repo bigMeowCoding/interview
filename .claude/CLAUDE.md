@@ -2,7 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-See [AGENTS.md](./AGENTS.md) for shared development rules.
+See [AGENTS.md](../AGENTS.md) for shared development rules.
+
+## 项目宪法
+
+本项目遵循 [constitution.md](./constitution.md)，所有技术决策必须经过"合宪性审查"。
 
 ## Claude Code 特定规则
 

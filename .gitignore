@@ -6,3 +6,4 @@ pnpm-lock.yaml
 /packages/*/node_modules/
 /packages/webpack/dist/
 /packages/webpack2/dist/
+dist

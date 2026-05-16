@@ -210,22 +210,25 @@
   border-bottom: none;
 }
 
-.lesson1-case {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px dashed #cfd6e8;
-}
-
-.lesson1-case-title {
+.lesson1-case-title,
+.lesson2-case-title,
+.lesson3-case-title,
+.lesson4-case-title {
   margin: 0 0 8px;
   font-size: 0.95rem;
 }
 
-.lesson1-case-lead {
+.lesson1-case-lead,
+.lesson2-case-lead,
+.lesson3-case-lead,
+.lesson4-case-lead {
   margin-top: 0;
 }
 
-.lesson1-case-steps {
+.lesson1-case-steps,
+.lesson2-case-steps,
+.lesson3-case-steps,
+.lesson4-case-steps {
   margin-bottom: 12px;
 }
 
@@ -275,8 +278,25 @@ ol.steps.compact {
   margin: 0 0 10px;
 }
 
+.lesson-lab-scope {
+  margin: -4px 0 12px;
+  font-size: 0.84rem;
+}
+
+.lesson-stats-subset {
+  max-width: 100%;
+}
+
+.lesson-case-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #cfd6e8;
+}
+
 .lab-section {
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .lab-section.lab-focused {
@@ -298,4 +318,40 @@ ol.steps.compact {
   background: #e8eefc;
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.concept-note {
+  margin: 12px 0 16px;
+  padding: 10px 12px;
+  background: #f6f8fc;
+  border: 1px solid #d8e0f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #2a3348;
+}
+
+.concept-note > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #3d4f7a;
+}
+
+.concept-note-body {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e8f4;
+}
+
+.concept-note-body p {
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.concept-note-body p:last-child {
+  margin-bottom: 0;
+}
+
+.concept-note-ref {
+  font-size: 0.78rem;
+  color: #5c6578;
 }

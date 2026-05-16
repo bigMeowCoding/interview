@@ -65,8 +65,13 @@ export const LESSONS: Lesson[] = [
       "点击「清空 Detached DOM 引用数组」后拍 Snapshot 3，对比 Snapshot 2 是否回落。",
     ],
     labGuide:
-      "优先用手动区的「制造 Detached DOM」——现象单一，适合第一次看清 Detached。之后再试 React 泄漏子组件（同一课综合能力）。",
-    tryThis: ["基准快照 → 点 3 次「制造 Detached DOM」→ 再快照 → Comparison", "再点「清空 Detached DOM 引用数组」→ 第三张快照对比"],
+      "优先跑下方「第二课配套案例」：干净 vs 泄漏两轮 Comparison，只看 Detached/HTMLDivElement；再点单次「制造 Detached DOM」加深印象。进阶：第 5 课泄漏子组件每轮也会 push Detached，可与本课对照。",
+    realWorldExample:
+      "例如 Tooltip/Popover 关闭后节点已从文档移除，但工具函数仍把容器节点放在模块级 Set 里做「缓存」；或列表单元格里 append 的临时节点被错误地放进全局 debug 数组。表现：节点不在 Elements 树里，却在 Heap 里显示 Detached，retaining path 指向你的缓存或 React fiber 外的某个数组。",
+    tryThis: [
+      "第二课配套案例：干净 ×15 vs 泄漏 ×15，各做 Comparison，并在快照里搜 Detached",
+      "再单点 3 次「制造 Detached DOM」→ 清空引用数组 → 第三张快照验证回落",
+    ],
     checklist: [
       "我能解释 Detached DOM 与「页面里看不见」不是一回事。",
       "我会在快照树里顺着 retaining path 找到是谁握着节点。",
@@ -85,14 +90,19 @@ export const LESSONS: Lesson[] = [
     ],
     chromeSteps: [
       "拍 Snapshot 1。",
-      "多次点击「document 上多加一个 click 监听」与「新建 setInterval」。",
+      "优先试用实验区「第三课配套案例」：**干净 ×15** / **泄漏 ×15** 各跑一轮 Comparison；或逐项多次点击「document 上多加一个 click 监听」与「新建 setInterval」。",
       "拍 Snapshot 2，Comparison 看闭包、函数对象或 Native 相关条目变化（不同 Chrome 版本展示略有差异）。",
       "打开 Performance Monitor（右上角 ⋮ → More tools），观察 JS heap / DOM 是否在重复操作下爬升。",
       "依次「移除监听」「clear interval」，拍 Snapshot 3 对比。",
     ],
     labGuide:
-      "配合页面上的计数器：eventListeners、intervals 与你在本课点的次数应对得上。先单项点击（只加监听或只加 interval），再组合。",
-    tryThis: ["只堆监听 5 次 → 快照对比", "再只堆 interval 3 次 → 快照", "最后用修复区两项清理 → 再快照"],
+      "优先跑下方「第三课配套案例」：两轮 Comparison，观察页面计数器的 eventListeners、intervals 是否与操作次数对齐；再配合单项点击只做监听或只做 interval；最后用修复区验证回落。",
+    tryThis: [
+      "第三课配套案例：干净 ×15 vs 泄漏 ×15，各 Comparison 一次（泄漏轮每迭代各 +1 监听与 +1 interval）",
+      "只堆监听 5 次 → 快照对比",
+      "再只堆 interval 3 次 → 快照",
+      "最后用修复区两项清理 → 再快照",
+    ],
     checklist: [
       "我会在组件卸载或路由离开时联想到 removeEventListener / clearInterval。",
       "我知道第三方库也可能注册全局监听，需要查 dispose API。",
@@ -111,14 +121,18 @@ export const LESSONS: Lesson[] = [
     ],
     chromeSteps: [
       "拍 Snapshot 1。",
-      "多次点击「泄漏 ~1MB 字符串」，每次约多 1MB 量级（视引擎而定）。",
+      "优先使用「第四课配套案例」跑**干净 ×15** / **泄漏 ×15** 各一轮 Comparison；或多次点击「泄漏 ~1MB 字符串」。",
       "Snapshot 2 Comparison 后按 Retained size 或 Delta 排序，找大块增长。",
       "展开条目查看 retaining path，确认与本 demo 全局数组的关系。",
       "「清空大字符串缓存」后 Snapshot 3，对比是否明显下降。",
     ],
     labGuide:
-      "本课训练「按大小找元凶」。若列表太长，用筛选框输入 string、Array 或与源码相关的变量意图缩小范围。",
-    tryThis: ["连续泄漏字符串 3～5 次", "在 Comparison 里按 Retained 排序找大块", "清空字符串缓存后再拍一张验证"],
+      "本课训练「按大小找元凶」。**Shallow size** 侧重对象**自身**占用；**Retained size** 近似「以该节点为入口、会一并被回收的那片子图」——小对象也可能 Retained 很大（拽着大数组/大字符串）。排查时多按 Retained 或 Comparison 里的 Delta 排序，再结合 retaining path。若列表太长，用筛选框输入 string、Array 缩小范围。",
+    tryThis: [
+      "第四课配套案例：干净 ×15 vs 泄漏 ×15，各 Comparison 一次（~1MB strings 计数应与泄漏次数对齐）",
+      "再连续手动泄漏字符串 3～5 次，体会单次点击与批量的差别",
+      "在 Comparison 里按 Retained 排序找大块 → 清空字符串缓存后再拍验证回落",
+    ],
     checklist: [
       "我能说出 Retained size 为什么往往比 Shallow 更值得先看。",
       "我会对大 Delta 的对象先看 retaining path 再改代码。",
@@ -144,7 +158,11 @@ export const LESSONS: Lesson[] = [
     ],
     labGuide:
       "先只玩泄漏子组件，计数器会飙升；再切到干净子组件只做挂载卸载，观察计数与快照差异。修复泄漏需改源码里的 useEffect cleanup（本 demo 故意不写）。",
-    tryThis: ["泄漏：连续挂载/卸载 20 次 → 快照", "卸载泄漏组件后点「移除监听」「clear interval」「清空 Detached 引用」", "干净子组件：多次挂载卸载 → 再快照对照"],
+    tryThis: [
+      "泄漏：连续挂载/卸载 20 次 → 快照",
+      "卸载泄漏组件后点「移除监听」「clear interval」「清空 Detached 引用」",
+      "干净子组件：多次挂载卸载 → 再快照对照",
+    ],
     checklist: [
       "我会在每个订阅类 effect 里问自己：卸载时要 cancel / unsubscribe / clear 吗？",
       "我会避免在全局模块级数组里长期 push DOM/React 引用。",

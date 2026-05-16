@@ -9,8 +9,8 @@
 
 1. **课程导航**：可在第 1～5 课之间切换；支持上一课 / 下一课。
 2. **每课讲义**：学习目标（学完你会）、Chrome 操作步骤、本课如何使用 Demo、建议操作顺序、自查清单（可勾选）。
-3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课附带「抽屉开关」干净/泄漏对照案例**；全局计数与刷新；切换课程不自动清空已制造泄漏。
-4. **可测试**：泄漏登记状态（`state.ts`）、第一课抽屉案例（`lesson1-drawer-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
+3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课「抽屉开关」**、**第二课「Detached 专一」**、**第三课「监听 + 定时器」**与**第四课「大字符串」**附带干净/泄漏对照案例；支持 URL `?lesson=N` 直达第 N 课；全局计数与刷新；切换课程不自动清空已制造泄漏。
+4. **可测试**：`state.ts`、第一课抽屉案例、第二课 Detached 案例（`lesson2-detached-case.ts`）、第三课监听/定时器案例（`lesson3-listeners-interval-case.ts`）、第四课大字符串案例（`lesson4-huge-string-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
 
 ## 实现映射
 
@@ -21,6 +21,9 @@
 | 泄漏登记 / 修复 | `src/react/memory-leak-demo/state.ts` |
 | 样式 | `src/react/memory-leak-demo/style.css` |
 | 第一课抽屉对照案例 | `src/react/memory-leak-demo/lesson1-drawer-case.ts` |
+| 第二课 Detached 对照案例 | `src/react/memory-leak-demo/lesson2-detached-case.ts` |
+| 第三课 监听 / 定时器对照案例 | `src/react/memory-leak-demo/lesson3-listeners-interval-case.ts` |
+| 第四课 大字符串对照案例 | `src/react/memory-leak-demo/lesson4-huge-string-case.ts` |
 
 ## 第一课配套案例（可运行）
 
@@ -40,6 +43,42 @@
 2. 干净 ×15 → Snapshot **B**，Comparison(A, B)  
 3. 重置 → Snapshot **A′**  
 4. 泄漏 ×15 → Snapshot **B′**，Comparison(A′, B′)
+
+## 第二课配套案例（可运行）
+
+**业务隐喻**：浮层 / Tooltip / Toast 等节点从文档移除后，仍被 JS 容器引用。
+
+| 按钮 | 行为 |
+|------|------|
+| **重置案例环境** | 同第一课，调用 `resetLeakDemoState()` |
+| **干净：仅挂载卸下 ×15** | 每轮：`div` 挂上 `body` 再 `removeChild`，**不** `pushDetachedNode` |
+| **泄漏：Detached 引用 ×15** | 每轮：同上但从文档移除后执行 `pushDetachedNode`，模拟全局缓存握着节点 |
+
+**第二课要看到的价值**：Comparison 里侧重 **Detached / HTMLDivElement** 与 retaining path 指向 demo 数组（及后续在真实项目里指向你的 Map/数组）；干净轮次不应增加本页的 `detachedDomRefs` 计数。
+
+## 第三课配套案例（可运行）
+
+**业务隐喻**：路由/弹层挂载时 `addEventListener` + `setInterval`，离开分支时忘了 teardown。
+
+| 按钮 | 行为 |
+|------|------|
+| **重置案例环境** | 同前两课，`resetLeakDemoState()` |
+| **干净：同步注册并清理 ×15** | 每轮：`document` 上同步 add/remove 一个 `click`；再 `setInterval` 后立即 `clearInterval`。不经过本 demo 的泄漏登记表 |
+| **泄漏：监听+interval ×15** | 每轮：`registerLeakyListener(document, click)` + `startLeakyInterval(1500)`，计数区 `eventListeners` 与 `intervals` 各 +1 |
+
+**第三课要看到的价值**：两轮 Comparison 中，泄漏版 **`eventListeners` 与 `intervals` 与次数同涨**（每轮两件事都做）；再用修复区移除监听、cleanup interval，新快照应变少。干净轮两计数应保持 0。
+
+## 第四课配套案例（可运行）
+
+**业务隐喻**：日志拼接、富文本缓存、导出 CSV 等把大段字符串放进模块级数组或 Map。
+
+| 按钮 | 行为 |
+|------|------|
+| **重置案例环境** | 调用 `resetLeakDemoState()` |
+| **干净：临时大字符串 ×15** | 每轮：`"x".repeat(1_000_000)` 仅作临时值，**不** `push` 到 `hugeStringRetention` |
+| **泄漏：缓存 ~1MB 字符串 ×15** | 每轮：等同多次点击「泄漏 ~1MB 字符串」，全局计数 `millionCharStrings` +1 |
+
+**第四课要看到的价值**：干净轮页面 **`~1MB strings` 仍为 0**，堆上不应像泄漏轮那样出现与次数成比例的常驻大字符串；Comparison 里按 Retained / Delta 排序时，泄漏轮更容易看到「大块」与 retaining path 指向本 demo 的全局数组。
 
 ## 五节课内容（讲义）
 
@@ -98,19 +137,23 @@
 **Chrome 操作（跟着做）**
 
 1. 拍一张基准快照 (Snapshot 1)。  
-2. 在实验区多次点击「制造 Detached DOM 并保留引用」（或 React 泄漏里的挂载循环）。  
+2. 优先使用实验区「第二课配套案例」：**干净 ×15** / **泄漏 ×15** 各跑一轮 Comparison；或多次点击「制造 Detached DOM 并保留引用」（及第 5 课 React 泄漏子挂载循环）。  
 3. 再拍 Snapshot 2，用 Comparison 对比 Snapshot 1。  
 4. 在筛选器输入 Detached 或 HTMLDivElement，展开 retaining path 阅读引用链。  
 5. 点击「清空 Detached DOM 引用数组」后拍 Snapshot 3，对比 Snapshot 2 是否回落。
 
+**实际场景举例**
+
+例如 Tooltip/Popover 关闭后节点已从文档移除，但工具函数仍把容器节点放在模块级 Set 里做「缓存」；或列表单元格里 append 的临时节点被错误地放进全局 debug 数组。表现：节点不在 Elements 树里，却在 Heap 里显示 Detached，retaining path 指向你的缓存或 React fiber 外的某个容器。
+
 **本课怎么用这个 Demo**
 
-优先用手动区的「制造 Detached DOM」——现象单一，适合第一次看清 Detached。之后再试 React 泄漏子组件（同一课综合能力）。
+优先跑「第二课配套案例」：干净 vs 泄漏两轮 Comparison，只看 Detached/HTMLDivElement；再点单次「制造 Detached DOM」加深印象。进阶：第 5 课泄漏子组件每轮也会 push Detached，可与本课对照。
 
 **建议顺序**
 
-1. 基准快照 → 点 3 次「制造 Detached DOM」→ 再快照 → Comparison  
-2. 再点「清空 Detached DOM 引用数组」→ 第三张快照对比  
+1. 第二课配套案例：干净 ×15 vs 泄漏 ×15，各做 Comparison，并在快照里搜 Detached。  
+2. 再单点 3 次「制造 Detached DOM」→ 清空引用数组 → 第三张快照验证回落。  
 
 **自查**
 
@@ -134,20 +177,21 @@
 **Chrome 操作（跟着做）**
 
 1. 拍 Snapshot 1。  
-2. 多次点击「document 上多加一个 click 监听」与「新建 setInterval」。  
+2. 优先试用实验区「第三课配套案例」：**干净 ×15** / **泄漏 ×15** 各跑一轮 Comparison；或逐项多次点击「document 上多加一个 click 监听」与「新建 setInterval」。  
 3. 拍 Snapshot 2，Comparison 看闭包、函数对象或 Native 相关条目变化（不同 Chrome 版本展示略有差异）。  
 4. 打开 Performance Monitor（右上角 ⋮ → More tools），观察 JS heap / DOM 是否在重复操作下爬升。  
 5. 依次「移除监听」「clear interval」，拍 Snapshot 3 对比。
 
 **本课怎么用这个 Demo**
 
-配合页面上的计数器：eventListeners、intervals 与你在本课点的次数应对得上。先单项点击（只加监听或只加 interval），再组合。
+优先跑「第三课配套案例」两轮 Comparison，`eventListeners` 与 `intervals` 与次数应对齐；再单项只做监听或只做 interval；最后用修复区两项验证回落。
 
 **建议顺序**
 
-1. 只堆监听 5 次 → 快照对比  
-2. 再只堆 interval 3 次 → 快照  
-3. 最后用修复区两项清理 → 再快照  
+1. 第三课配套案例：干净 ×15 vs 泄漏 ×15，各 Comparison 一次  
+2. 只堆监听 5 次 → 快照对比  
+3. 再只堆 interval 3 次 → 快照  
+4. 最后用修复区两项清理 → 再快照  
 
 **自查**
 
@@ -168,23 +212,31 @@
 2. 知道字符串、大数组在快照里常表现为独立条目或 Array / system / String。  
 3. 学会用「泄漏 → 对比 → 排序 Retained → 读 retaining path」缩小范围。
 
+**知识点：Shallow size 与 Retained size**
+
+- **Shallow size（浅层 / 自身）**：通常指**这个堆节点自己**占用的字节，**不包含**它通过属性、内部槽位引出去的那些子对象。因此一个小 wrapper 若只拿着某个大数组的引用，它的 Shallow 往往仍然很小；而真正「块头大」的可能是那条引用链末端的 `Array`、`String` 等条目。
+- **Retained size（保留）**：若从根集合出发整条引用图不变、仅考虑「释放这个节点所指的那一份子图」时，GC **能多回收多少内存**（工程上常把它理解成：该对象自身 + **只靠从它出发才能到达**、且无其它路径保活的对象；若同一对象还被全局、闭包等别路引用，就不会把整坨都算进**单条** retaining path 的「独占责任」里——Chrome 展示可能会有聚合/去重规则，细节以官方文档为准）。
+- **对照记忆**：Shallow 回答「**这个格子本身**胖不胖」；Retained 回答「**从格子当入口**能拽出多大一片」。
+- **小例子**：`wrapper`（Shallow 很小）**唯一**引用一个约 10MB 的数组 → `wrapper` 或与之相邻的条目上，**Retained** 往往接近 10MB 量级；若该数组还被 `window` 上的变量引用，则大块的主要「谁在保留」会更多体现在那条全局链上。
+- **为何要会看 Retained**：泄漏排查时按 **Retained** 或 **Delta** 排序，更容易发现**入口小、却牵着一大坨**的节点；再展开 **retaining path** 追到缓存数组、Map、未清理的闭包等代码位置。
+
 **Chrome 操作（跟着做）**
 
 1. 拍 Snapshot 1。  
-2. 多次点击「泄漏 ~1MB 字符串」，每次约多 1MB 量级（视引擎而定）。  
+2. 优先使用实验区「第四课配套案例」：**干净 ×15** / **泄漏 ×15** 各跑一轮 Comparison；或多次点击「泄漏 ~1MB 字符串」，每次约多 1MB 量级（视引擎而定）。  
 3. Snapshot 2 Comparison 后按 Retained size 或 Delta 排序，找大块增长。  
 4. 展开条目查看 retaining path，确认与本 demo 全局数组的关系。  
 5. 「清空大字符串缓存」后 Snapshot 3，对比是否明显下降。
 
 **本课怎么用这个 Demo**
 
-本课训练「按大小找元凶」。若列表太长，用筛选框输入 string、Array 或与源码相关的变量意图缩小范围。
+本课训练「按大小找元凶」。**Shallow** 侧重对象自身占用；**Retained** 近似「以该节点为入口、会一并被回收的那片子图」——小对象也可能 Retained 很大（拽着大数组/大字符串）。排查时多按 Retained 或 Comparison 里的 Delta 排序，再结合 retaining path。若列表太长，用筛选框输入 string、Array 缩小范围。
 
 **建议顺序**
 
-1. 连续泄漏字符串 3～5 次  
-2. 在 Comparison 里按 Retained 排序找大块  
-3. 清空字符串缓存后再拍一张验证  
+1. 第四课配套案例：干净 ×15 vs 泄漏 ×15，各 Comparison 一次（页面 `~1MB strings` 应与泄漏次数对齐）  
+2. 再连续手动泄漏字符串 3～5 次  
+3. 在 Comparison 里按 Retained 排序找大块 → 清空字符串缓存后再拍一张验证  
 
 **自查**
 

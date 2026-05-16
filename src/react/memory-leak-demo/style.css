@@ -1,0 +1,301 @@
+.memory-leak-demo {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f6f7fb;
+  min-height: 100vh;
+}
+
+.memory-leak-demo h1 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.memory-leak-demo .sub {
+  margin: 0 0 20px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.memory-leak-demo section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.memory-leak-demo section h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.memory-leak-demo ol.steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.88rem;
+  color: #333;
+}
+
+.memory-leak-demo .stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+
+.memory-leak-demo .stat {
+  padding: 8px 10px;
+  background: #f0f2f8;
+  border-radius: 6px;
+}
+
+.memory-leak-demo .btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.memory-leak-demo button {
+  cursor: pointer;
+  border: 1px solid #c8cfdd;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.memory-leak-demo button:hover {
+  background: #eef1f8;
+}
+
+.memory-leak-demo button.danger {
+  border-color: #e8a598;
+  background: #fff5f3;
+}
+
+.memory-leak-demo button.fix {
+  border-color: #8fc9a8;
+  background: #f0faf3;
+}
+
+.memory-leak-demo .hint {
+  font-size: 0.82rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.memory-leak-demo code {
+  font-size: 0.8em;
+  background: #eee;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.lesson-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.lesson-tab {
+  cursor: pointer;
+  border: 1px solid #c8cfdd;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  text-align: left;
+  max-width: 100%;
+}
+
+.lesson-tab:hover {
+  background: #eef1f8;
+}
+
+.lesson-tab.active {
+  border-color: #6b8cce;
+  background: #e8eefc;
+  font-weight: 600;
+}
+
+.lesson-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 20px 8px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+  border: 1px solid #e2e6ef;
+}
+
+.lesson-card-head h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.lesson-sub {
+  margin: 0 0 12px;
+  color: #555;
+  font-size: 0.88rem;
+}
+
+.lesson-arrows {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.nav-arrow {
+  cursor: pointer;
+  border: 1px solid #c8cfdd;
+  background: #f8f9fc;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  background: #eef1f8;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lesson-block {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.lesson-block:last-child {
+  border-bottom: none;
+}
+
+.lesson-block h3 {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  color: #333;
+}
+
+.lesson-block ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.86rem;
+  color: #363636;
+}
+
+.lesson-block.scenario {
+  background: #fffbf5;
+  border: 1px solid #f0e0d0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.lesson-block.highlight {
+  background: #f8fafc;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 12px 12px 14px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.lesson1-case {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed #cfd6e8;
+}
+
+.lesson1-case-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.lesson1-case-lead {
+  margin-top: 0;
+}
+
+.lesson1-case-steps {
+  margin-bottom: 12px;
+}
+
+.lesson-lab-guide {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  color: #444;
+}
+
+.mini-label {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+ol.steps.compact {
+  font-size: 0.84rem;
+}
+
+.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+
+.checklist li {
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+}
+
+.checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checklist input[type="checkbox"] {
+  margin-top: 3px;
+}
+
+.lab-intro {
+  font-size: 0.84rem;
+  color: #555;
+  margin: 0 0 10px;
+}
+
+.lab-section {
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.lab-section.lab-focused {
+  box-shadow: 0 0 0 2px #6b8cce;
+  border: 1px solid #9eb5e8;
+}
+
+.lab-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lab-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5a6fa8;
+  background: #e8eefc;
+  padding: 2px 8px;
+  border-radius: 999px;
+}

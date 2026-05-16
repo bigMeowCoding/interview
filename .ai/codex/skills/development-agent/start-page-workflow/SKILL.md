@@ -74,15 +74,19 @@ description: Imported from Cursor command $baseName; use when this command workf
 请按以下结构组织你的输出：
 
 ### 1. 当前阶段
+
 明确说明当前正在执行 `ui-agent`、`architecture-agent` 还是 `development-agent`。
 
 ### 2. 当前产出
+
 输出该阶段的结果，确保信息完整可传递到下一阶段。
 
 ### 3. 待确认问题
+
 如果有任何不明确点，列成清单并等待用户回复；不要继续往下执行。
 
 ### 4. 下一步
+
 如果当前阶段完成且没有未决问题，明确说明下一步应交给哪个 agent。
 
 ## 约束

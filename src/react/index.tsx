@@ -1,6 +1,6 @@
-import React, { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import RouterDemo from "./router";
+import MemoryLeakDemo from "./memory-leak-demo/MemoryLeakDemo";
+// import RouterDemo from "./router";
 // import HashRouterDemo from "./router/hash-index";
 // import ReduxDemo from "./redux";
 // import WaterPrint from "./canvas/water-print/water-print";
@@ -8,18 +8,20 @@ import RouterDemo from "./router";
 // import Counter from "./counter";
 // import CounterDown from "./counter-down";
 
-
 const rootEl = document.getElementById("root");
+if (!rootEl) {
+  throw new Error("#root not found");
+}
 const root = createRoot(rootEl);
-
 
 root.render(
   <>
-    <RouterDemo />
+    <MemoryLeakDemo />
+    {/* import RouterDemo from "./router" 后可切换 */}
     {/*  <HashRouterDemo/>*/}
     {/*<ReduxDemo />*/}
     {/*<CounterDown/>*/}
     {/*  <WaterPrint/>*/}
     {/* <ClipDemo/> */}
-  </>
+  </>,
 );

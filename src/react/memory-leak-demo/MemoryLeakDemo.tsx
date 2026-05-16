@@ -33,6 +33,12 @@ import {
   runHugeStringScenarioClean,
   runHugeStringScenarioLeaky,
 } from "./lesson4-huge-string-case";
+import {
+  LESSON5_REACT_CASE_TITLE,
+  runReactCleanScenarioBatch,
+  runReactLeakScenarioBatch,
+  simulateLeakyMountChildEffect,
+} from "./lesson5-react-case";
 
 function readInitialLessonIdx(): number {
   if (typeof window === "undefined") {
@@ -54,20 +60,7 @@ function useLeakStatsTick() {
 /** 卸载后仍保留 resize 监听、定时器、Detached DOM 引用 */
 function LeakyMountChild({ label }: { label: string }) {
   useEffect(() => {
-    const onResize = () => undefined;
-    registerLeakyListener({
-      target: window,
-      type: "resize",
-      handler: onResize,
-    });
-    startLeakyInterval(2000);
-
-    const el = document.createElement("div");
-    el.textContent = `detached-${label}`;
-    el.className = "leak-detached-node";
-    document.body.appendChild(el);
-    document.body.removeChild(el);
-    pushDetachedNode(el);
+    simulateLeakyMountChildEffect(label);
     return undefined;
   }, [label]);
 
@@ -124,8 +117,9 @@ export default function MemoryLeakDemo() {
       <p className="sub">
         配合 DevTools <strong>Memory → Heap snapshot</strong>
         按课练习；切换课程<strong>只会更换下方实验区与本课讲义</strong>
-        ，不会自动清空你已制造的泄漏。URL 示例：<code>?lesson=3</code>{" "}
-        直达监听与定时器课。
+        ，不会自动清空你已制造的泄漏。URL 示例：<code>?lesson=3</code>
+        （监听与定时器）、<code>?lesson=5</code>
+        （React）直达对应课。
       </p>
 
       <nav className="lesson-nav" aria-label="课程切换">
@@ -316,10 +310,11 @@ export default function MemoryLeakDemo() {
       {lesson.index === 5 ? (
         <>
           <section className="lab-section lab-focused">
-            <h2 className="lab-heading">实验区 · 第五课 · 计数板</h2>
+            <h2 className="lab-heading">实验区 · 第五课 · 计数与配套案例</h2>
             <p className="hint lesson-lab-scope">
-              挂载泄漏子组件时，下列三项会<strong>逐项累积</strong>
-              （本课不涉及大字符串练习）。
+              泄漏<strong>挂载副作用</strong>每发生一次，
+              <code>eventListeners</code>、<code>intervals</code>、
+              <code>detachedDomRefs</code> 各 +1（本课不涉及大字符串）。
             </p>
             <div className="stats lesson-stats-subset">
               <div className="stat">
@@ -335,10 +330,77 @@ export default function MemoryLeakDemo() {
                 刷新计数显示
               </button>
             </div>
+
+            <div className="lesson-case-block lesson5-case-alone">
+              <h3 className="lesson5-case-title">
+                第五课配套案例：{LESSON5_REACT_CASE_TITLE}
+              </h3>
+              <p className="hint lesson5-case-lead">
+                与第 2～4 课同样做两轮{" "}
+                <strong>A → 操作 → B → Comparison</strong>
+                。下方按钮是<strong>纯函数批量</strong>
+                ，与泄漏子组件的单次 <code>useEffect</code> 登记逻辑一致，且
+                <strong>每轮只累加一回</strong>
+                （避免开发态 Strict Mode 对「真实挂载」的双调用干扰读数）。
+                跑完再配合下方真实子组件挂载体验路由级场景。
+              </p>
+              <ol className="steps lesson5-case-steps">
+                <li>
+                  点<strong>重置案例环境</strong>
+                  （会清空监听、Detached、interval、字符串等）。
+                </li>
+                <li>
+                  拍 <strong>Snapshot A</strong>。
+                </li>
+                <li>
+                  <strong>干净：cleanup 对等 ×15</strong> → Snapshot B；
+                  三项计数应仍为 <strong>0</strong>。
+                </li>
+                <li>
+                  <strong>重置案例环境</strong> → Snapshot A′ →{" "}
+                  <strong>泄漏：等价挂载副作用 ×15</strong> → Snapshot B′， 在
+                  Comparison 里结合前几课搜监听、interval、Detached。
+                </li>
+                <li>Unmount 后可用修复区逐项清理，验证回落。</li>
+              </ol>
+              <div className="btn-row">
+                <button
+                  type="button"
+                  className="fix"
+                  onClick={() => {
+                    resetLeakDemoState();
+                    refresh();
+                  }}
+                >
+                  重置案例环境
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    runReactCleanScenarioBatch(15);
+                    refresh();
+                  }}
+                >
+                  干净：cleanup 对等 ×15
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => {
+                    runReactLeakScenarioBatch(15);
+                    refresh();
+                  }}
+                >
+                  泄漏：等价挂载副作用 ×15
+                </button>
+              </div>
+            </div>
           </section>
 
           <section className="lab-section lab-focused">
-            <h2 className="lab-heading">实验区 · React 挂载 / 卸载</h2>
+            <h2 className="lab-heading">
+              实验区 · React 真实挂载 / 卸载（进阶）
+            </h2>
             <p className="hint">
               泄漏子组件在卸载时<strong>不</strong>
               移除监听与定时器，并把已从文档移除的 DOM 放进全局数组。

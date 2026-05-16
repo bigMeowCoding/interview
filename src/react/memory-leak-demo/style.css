@@ -213,7 +213,8 @@
 .lesson1-case-title,
 .lesson2-case-title,
 .lesson3-case-title,
-.lesson4-case-title {
+.lesson4-case-title,
+.lesson5-case-title {
   margin: 0 0 8px;
   font-size: 0.95rem;
 }
@@ -221,14 +222,16 @@
 .lesson1-case-lead,
 .lesson2-case-lead,
 .lesson3-case-lead,
-.lesson4-case-lead {
+.lesson4-case-lead,
+.lesson5-case-lead {
   margin-top: 0;
 }
 
 .lesson1-case-steps,
 .lesson2-case-steps,
 .lesson3-case-steps,
-.lesson4-case-steps {
+.lesson4-case-steps,
+.lesson5-case-steps {
   margin-bottom: 12px;
 }
 

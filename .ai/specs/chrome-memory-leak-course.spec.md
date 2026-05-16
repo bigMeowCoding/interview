@@ -9,8 +9,8 @@
 
 1. **课程导航**：可在第 1～5 课之间切换；支持上一课 / 下一课。
 2. **每课讲义**：学习目标（学完你会）、Chrome 操作步骤、本课如何使用 Demo、建议操作顺序、自查清单（可勾选）。
-3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课「抽屉开关」**、**第二课「Detached 专一」**、**第三课「监听 + 定时器」**与**第四课「大字符串」**附带干净/泄漏对照案例；支持 URL `?lesson=N` 直达第 N 课；全局计数与刷新；切换课程不自动清空已制造泄漏。
-4. **可测试**：`state.ts`、第一课抽屉案例、第二课 Detached 案例（`lesson2-detached-case.ts`）、第三课监听/定时器案例（`lesson3-listeners-interval-case.ts`）、第四课大字符串案例（`lesson4-huge-string-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
+3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课「抽屉开关」**、**第二课「Detached 专一」**、**第三课「监听 + 定时器」**、**第四课「大字符串」**与**第五课「React 挂载副作用」**附带干净/泄漏对照案例；支持 URL `?lesson=N` 直达第 N 课；全局计数与刷新；切换课程不自动清空已制造泄漏。
+4. **可测试**：`state.ts`、第一课抽屉案例、第二课 Detached 案例（`lesson2-detached-case.ts`）、第三课监听/定时器案例（`lesson3-listeners-interval-case.ts`）、第四课大字符串案例（`lesson4-huge-string-case.ts`）、第五课 React 挂载案例（`lesson5-react-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
 
 ## 实现映射
 
@@ -24,6 +24,7 @@
 | 第二课 Detached 对照案例 | `src/react/memory-leak-demo/lesson2-detached-case.ts` |
 | 第三课 监听 / 定时器对照案例 | `src/react/memory-leak-demo/lesson3-listeners-interval-case.ts` |
 | 第四课 大字符串对照案例 | `src/react/memory-leak-demo/lesson4-huge-string-case.ts` |
+| 第五课 React 挂载对照案例 | `src/react/memory-leak-demo/lesson5-react-case.ts` |
 
 ## 第一课配套案例（可运行）
 
@@ -79,6 +80,18 @@
 | **泄漏：缓存 ~1MB 字符串 ×15** | 每轮：等同多次点击「泄漏 ~1MB 字符串」，全局计数 `millionCharStrings` +1 |
 
 **第四课要看到的价值**：干净轮页面 **`~1MB strings` 仍为 0**，堆上不应像泄漏轮那样出现与次数成比例的常驻大字符串；Comparison 里按 Retained / Delta 排序时，泄漏轮更容易看到「大块」与 retaining path 指向本 demo 的全局数组。
+
+## 第五课配套案例（可运行）
+
+**业务隐喻**：路由/抽屉挂载时用 `useEffect` 注册了全局监听或定时器，卸载分支未返回 cleanup。
+
+| 按钮 | 行为 |
+|------|------|
+| **重置案例环境** | `resetLeakDemoState()` |
+| **干净：cleanup 对等 ×15** | 每轮：等价于干净子组件的「即时 teardown」——`scroll` 监听后立即 remove、`setInterval` 后立即 clear，不经本 Demo 登记表 |
+| **泄漏：等价挂载副作用 ×15** | 每轮：与泄漏子组件单次 `useEffect` 同源（`window resize` + 登记 interval + Detached），页面三项计数各 +1 |
+
+**第五课要看到的价值**：配套案例先做 **两轮 A/B**，读数应与轮次对齐；再配合「真实挂载/卸载」对比 **React 18 开发态 Strict Mode** 下 effect 可能被双调用导致的计数翻倍，印证 cleanup 必填。最后用修复区逐项回落。
 
 ## 五节课内容（讲义）
 
@@ -260,20 +273,21 @@
 **Chrome 操作（跟着做）**
 
 1. 拍 Snapshot 1。  
-2. 使用「连续挂载/卸载泄漏子组件」10～20 次（放大泄漏）。  
+2. 实验区「第五课配套案例」：先后跑干净 ×15 / 等价泄漏挂载 ×15，各做一轮 Comparison（读数对齐轮次）；再使用「连续挂载/卸载泄漏子组件」10～20 次（放大信号，同源副作用）。  
 3. Snapshot 2 Comparison：结合前几课知识看监听、interval、detached。  
-4. 仅挂载「干净子组件」重复进出路由级场景（多次挂载卸载），再拍一张对比（应先无明显累积）。  
+4. 仅挂载「干净子组件」重复进出路由级场景（多次挂载卸载），再拍一张对比（应先无明显累积；开发态 Strict Mode 下注意观察 effect 双调用）。  
 5. 打开 Sources 或 Performance 辅助确认重复回调是否仍在触发（可选）。
 
 **本课怎么用这个 Demo**
 
-先只玩泄漏子组件，计数器会飙升；再切到干净子组件只做挂载卸载，观察计数与快照差异。修复泄漏需改源码里的 useEffect cleanup（本 demo 故意不写）。
+先跑配套案例的一对按钮对照计数与快照（批量路径每轮只累加一回）；再切换下方泄漏/干净子组件做真实挂载卸载，对比 Strict Mode 下计数是否被放大一倍。卸载后可用修复区验证回落；修复源代码里的 useEffect cleanup 才是根治（本 demo 故意不写 cleanup）。
 
 **建议顺序**
 
-1. 泄漏：连续挂载/卸载 20 次 → 快照  
-2. 卸载泄漏组件后点「移除监听」「clear interval」「清空 Detached 引用」  
-3. 干净子组件：多次挂载卸载 → 再快照对照  
+1. 第五课配套案例：干净 cleanup 对等 ×15 vs 泄漏等价挂载 ×15，各 Comparison 一次  
+2. 泄漏子组件连续挂载/卸载 20 次 → 快照  
+3. 卸载泄漏组件后点「移除监听」「clear interval」「清空 Detached 引用」  
+4. 干净子组件：多次挂载卸载 → 再快照对照  
 
 **自查**
 

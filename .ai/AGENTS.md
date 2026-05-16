@@ -1,8 +1,43 @@
 # AGENTS.md
 
-本文件为仓库内 **所有 AI Agent** 的共享规则入口（物理路径：`.ai/AGENTS.md`）。
+本文件为仓库内 **所有 AI Agent** 的共享规则入口（物理路径：`.ai/AGENTS.md`）。原 **`.ai/claude/CLAUDE.md`** 中的通用规则已并入本文件；Claude Code 仍可在 **`.ai/claude/CLAUDE.md`** 看到极简跳转说明。
 
 > **规则分离原则**：不依赖特定平台的规则统一写入本文件；只有依赖特定平台（如 Claude Code、Cursor 等）的规则才放入各平台的专属配置文件。
+
+## 代码风格
+
+JavaScript 代码必须有详尽的注释。
+
+## 项目宪法
+
+本项目遵循 **[`constitution.md`](./constitution.md)**，所有技术决策须经过「合宪性审查」。
+
+## Superpowers Skills
+
+配置了多个 Superpowers skills，执行任务前应优先使用：
+
+| 场景                           | Skill                                        |
+| ------------------------------ | -------------------------------------------- |
+| 创意工作（新增功能/组件/行为） | `superpowers:brainstorming`                  |
+| 声称工作完成/修复通过前        | `superpowers:verification-before-completion` |
+| 遇到 bug/测试失败              | `superpowers:systematic-debugging`           |
+| 实现功能或修复 bug 前          | `superpowers:test-driven-development`        |
+| 提交/PR 前验证                 | `superpowers:requesting-code-review`         |
+
+## MCP 集成
+
+项目已配置 GitHub MCP（`/.mcp.json`），可直接调用 GitHub API：
+
+- `mcp__github__issue_write` — 创建/更新 issue
+- `mcp__github__add_issue_comment` — 添加 issue 评论
+- `mcp__github__create_pull_request` — 创建 PR
+- `mcp__github__list_issues` / `mcp__github__list_pull_requests` — 列出 issues/PRs
+
+需要 `GITHUB_TOKEN` 环境变量（通过 `${GITHUB_TOKEN}` 在 `.mcp.json` 中引用）。
+
+## 语言说明
+
+项目代码和文档使用中文注释，与 Agent 的交互语言为中文。
 
 ## `.ai/` 目录用途
 
@@ -10,11 +45,11 @@
 
 ### 建议在本目录存放的内容
 
-| 类型 | 说明 |
-| ---- | ---- |
-| 提示词 / 草稿 | 可复用的系统提示、角色说明、检查清单草稿 |
-| 工作流笔记 | 多步骤任务拆解、验收标准、联调说明（非正式文档时可放此处） |
-| Agent 产出草稿 | 设计速记、调研摘录；定稿后应迁入正式文档或删除冗余 |
+| 类型             | 说明                                                                |
+| ---------------- | ------------------------------------------------------------------- |
+| 提示词 / 草稿    | 可复用的系统提示、角色说明、检查清单草稿                            |
+| 工作流笔记       | 多步骤任务拆解、验收标准、联调说明（非正式文档时可放此处）          |
+| Agent 产出草稿   | 设计速记、调研摘录；定稿后应迁入正式文档或删除冗余                  |
 | 本地工具脚本说明 | 若仅服务 Agent 流程，可在此记录用法（脚本本身可仍放在仓库其他目录） |
 
 ### 不建议放入的内容
@@ -30,10 +65,11 @@
 
 ### 本仓库的 Agent 配置位置
 
-| 路径 | 说明 |
-| ---- | ---- |
-| `.ai/claude/` | Claude Code：`CLAUDE.md`、`constitution.md`、`settings*.json`、`hooks/`、`skills/` |
-| `.ai/codex/` | Codex skills（如 `development-agent`、`sum`） |
+| 路径                  | 说明                                                                    |
+| --------------------- | ----------------------------------------------------------------------- |
+| `.ai/claude/`         | Claude Code：`CLAUDE.md`（跳转）、`settings*.json`、`hooks/`、`skills/` |
+| `.ai/constitution.md` | 项目开发宪法（全仓 Agent 须遵循）                                       |
+| `.ai/codex/`          | Codex skills（如 `development-agent`、`sum`）                           |
 
 仓库根目录的 `.claude`、`.codex` 为指向以上目录的**符号链接**，便于工具按默认路径解析；以 `.ai/` 下为唯一真实副本。
 

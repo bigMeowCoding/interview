@@ -12,34 +12,34 @@ This file provides shared rules for all AI agents working in this repository.
 
 ### src/ — 主要实现
 
-| 目录 | 内容 |
-|---|---|
-| `basic/` | JS 基础：`myCall`、`myBind`、`instanceof`、`debounce`、`throttle`、`mockNew`、`lazy`（React lazy loading）、`ajax` |
-| `sort/` | `merge-sort`、`quick-sort` 原地排序实现 |
-| `promise/` | `promise.js`（Promise A+ 实现）、`lazyMan.js`、`schedule.js`（并发限制器）、`imageLoad.js` |
-| `react/` | 三个子模块：`**redux/**`（手写 Redux：`createStore`、`Provider`、`connect`）；`**router/**`（基于 hash 的路由：`HashRouter`、`Route`、`Link`、`RouterContext`）；`**reactive/**`（`ref`、`computed` 响应式系统）|
-| `designPattern/` | `eventemitter`、`observer`、`publish-subscribe`、`factory` |
-| `inherit/` | 原型链、构造函数、组合继承等继承模式 |
-| `clone/` | `deepClone` — 支持循环引用的深拷贝 |
-| `compose/` | 函数组合工具 |
-| `data-constructor/` | `max-heap.js`、事件发射器等数据结构 |
-| `leetcode/` | 按题号/名称组织的 LeetCode 题目（如 `146-LRU/`、`215-数组中第k个最大元素/`） |
-| `array/`、`object/` | 数组/对象工具函数 |
-| `timer/` | `setTimeout`、`setInterval` polyfill |
-| `react/canvas/` | Canvas 裁剪、水印等演示 |
-| `react/counter/` | 简单 React counter 演示 |
-| `optimization/` | 算法优化问题（如 `three-sum`） |
-| `funcParticle/` | 函数式编程工具 |
-| `file/` | FileReader 工具 |
+| 目录                | 内容                                                                                                                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `basic/`            | JS 基础：`myCall`、`myBind`、`instanceof`、`debounce`、`throttle`、`mockNew`、`lazy`（React lazy loading）、`ajax`                                                                                               |
+| `sort/`             | `merge-sort`、`quick-sort` 原地排序实现                                                                                                                                                                          |
+| `promise/`          | `promise.js`（Promise A+ 实现）、`lazyMan.js`、`schedule.js`（并发限制器）、`imageLoad.js`                                                                                                                       |
+| `react/`            | 三个子模块：`**redux/**`（手写 Redux：`createStore`、`Provider`、`connect`）；`**router/**`（基于 hash 的路由：`HashRouter`、`Route`、`Link`、`RouterContext`）；`**reactive/**`（`ref`、`computed` 响应式系统） |
+| `designPattern/`    | `eventemitter`、`observer`、`publish-subscribe`、`factory`                                                                                                                                                       |
+| `inherit/`          | 原型链、构造函数、组合继承等继承模式                                                                                                                                                                             |
+| `clone/`            | `deepClone` — 支持循环引用的深拷贝                                                                                                                                                                               |
+| `compose/`          | 函数组合工具                                                                                                                                                                                                     |
+| `data-constructor/` | `max-heap.js`、事件发射器等数据结构                                                                                                                                                                              |
+| `leetcode/`         | 按题号/名称组织的 LeetCode 题目（如 `146-LRU/`、`215-数组中第k个最大元素/`）                                                                                                                                     |
+| `array/`、`object/` | 数组/对象工具函数                                                                                                                                                                                                |
+| `timer/`            | `setTimeout`、`setInterval` polyfill                                                                                                                                                                             |
+| `react/canvas/`     | Canvas 裁剪、水印等演示                                                                                                                                                                                          |
+| `react/counter/`    | 简单 React counter 演示                                                                                                                                                                                          |
+| `optimization/`     | 算法优化问题（如 `three-sum`）                                                                                                                                                                                   |
+| `funcParticle/`     | 函数式编程工具                                                                                                                                                                                                   |
+| `file/`             | FileReader 工具                                                                                                                                                                                                  |
 
 ### packages/ — 子项目（pnpm workspace）
 
-| 包 | 用途 |
-|---|---|
-| `mini-vite/` | 简化版 Vite 实现 |
-| `ssr/` | 基于 webpack 的 SSR 演示 |
-| `webpack/` | Webpack 配置示例 |
-| `webpack2/` | 额外 webpack 配置 |
+| 包           | 用途                     |
+| ------------ | ------------------------ |
+| `mini-vite/` | 简化版 Vite 实现         |
+| `ssr/`       | 基于 webpack 的 SSR 演示 |
+| `webpack/`   | Webpack 配置示例         |
+| `webpack2/`  | 额外 webpack 配置        |
 
 ## 技术栈
 

@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-on-write"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(find /Users/zhouyijun/.claude/plugins/cache/planning-with-files -name \"INSTALL*\" -o -name \"install*\" 2>/dev/null | head -5)",
+      "Read(//Users/zhouyijun/.claude/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": false
+  }
+}

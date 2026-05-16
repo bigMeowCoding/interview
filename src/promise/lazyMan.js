@@ -1,65 +1,56 @@
 class LazyMan {
+  #tasks = [];
+
   constructor(name) {
     this.name = name;
-    this.tasks = [];
-    this.sayName();
-    setTimeout(this.run.bind(this), 0);
+    this.#addTask(() => console.log(`Hi I am ${this.name}`));
+    queueMicrotask(() => this.#run());
   }
-  sleep(time, atFirst = false) {
-    this.addTask(() => {
-      return new Promise((res) => {
-        setTimeout(() => {
-          res(true);
-        }, time);
-      });
-    }, atFirst);
+
+  sleep(time) {
+    this.#addTask(async () => {
+      await this.#sleep(time);
+    });
     return this;
   }
+
   sleepFirst(time) {
-    this.sleep(time, true);
-  }
-  sayName() {
-    this.addTask(() => {
-      console.log(`hi I am ${this.name}`);
-    });
+    this.#addTask(async () => {
+      await this.#sleep(time);
+    }, true);
     return this;
-  }
-  addTask(cb, atFirst = false) {
-    const task = () =>
-      new Promise((res) => {
-        const result = cb();
-        if (result && result.then) {
-          result.then(() => {
-            res(true);
-          });
-        } else {
-          res(true);
-        }
-      });
-    if (atFirst) {
-      this.tasks.unshift(task);
-    } else {
-      this.tasks.push(task);
-    }
-  }
-  run() {
-    if (!this.tasks.length) {
-      return;
-    }
-    const task = this.tasks.shift();
-    task().then(() => {
-      this.run();
-    });
   }
 
   eat(food) {
-    this.addTask(() => {
-      console.log(`eat ${food}`);
-    });
+    this.#addTask(() => console.log(`Eat ${food}`));
     return this;
   }
+
+  #addTask(task, atFirst = false) {
+    if (atFirst) {
+      this.#tasks.unshift(task);
+    } else {
+      this.#tasks.push(task);
+    }
+  }
+
+  async #run() {
+    while (this.#tasks.length > 0) {
+      const task = this.#tasks.shift();
+      try {
+        await task();
+      } catch (err) {
+        console.error("Task error:", err);
+      }
+    }
+  }
+
+  #sleep(ms) {
+    return new Promise((res) => setTimeout(res, ms));
+  }
 }
-//const hank = new LazyMan("Hank");
+
+// 用法示例
 const hank = new LazyMan("Hank");
 hank.sleep(1000).eat("dinner");
-// hank.eat("dinner").sleepFirst(1000);
+// hank.eat('dinner').sleepFirst(1000);

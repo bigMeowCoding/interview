@@ -1,0 +1,45 @@
+#!/bin/bash
+# Claude Code PostToolUse hook
+# 在 Edit/Write 工具执行后，自动用 prettier 格式化修改的文件
+
+# 输出到 log 文件以便在 Claude Code 控制台可见
+LOG_DIR="${HOME}/.claude/hooks-logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/format-on-write.log"
+
+{
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🎨 [$(date '+%H:%M:%S')] format-on-write hook triggered"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+} >> "$LOG_FILE"
+
+# Claude Code 通过 stdin 传递 JSON 事件上下文（忽略，改为用 git diff 检测变更）
+cat > /dev/null
+
+# 获取当前 git 仓库根目录
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+cd "$GIT_ROOT"
+
+# 获取本次 hook 触发前后的 git diff（未暂存的变更）
+FILES=$(git diff --name-only 2>/dev/null | grep -vE '(node_modules|\.test\.|\.spec\.|\.min\.)' || true)
+
+# 过滤需要格式化的文件类型
+FORMATTABLE=""
+for f in $FILES; do
+  EXT="${f##*.}"
+  case "$EXT" in
+    js|ts|jsx|tsx|vue|css|scss|less|json|md|html|yaml|yml)
+      if [ -f "$f" ]; then
+        FORMATTABLE="$FORMATTABLE $f"
+      fi
+      ;;
+  esac
+done
+
+if [ -n "$FORMATTABLE" ]; then
+  echo "📁 Files: $FORMATTABLE" | tee -a "$LOG_FILE" 2>/dev/null | cat >&2
+  echo "$FORMATTABLE" | xargs npx prettier --write 2>&1 | grep -v "^npm warn" | tee -a "$LOG_FILE" 2>/dev/null | cat >&2
+  echo "✅ Done" | tee -a "$LOG_FILE" 2>/dev/null | cat >&2
+else
+  echo "⚪ No formattable files found" | tee -a "$LOG_FILE" 2>/dev/null | cat >&2
+fi

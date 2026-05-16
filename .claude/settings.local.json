@@ -1,12 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch",
-      "Bash(find /Users/zhouyijun/.claude/plugins/cache/planning-with-files -name \"INSTALL*\" -o -name \"install*\" 2>/dev/null | head -5)"
+      "mcp__hello__greet",
+      "Bash(claude mcp add-json github '{\"type\":\"http\",\"url\":\"https://api.githubcopilot.com/mcp/\",\"headers\":{\"Authorization\":\"Bearer ${GITHUB_TOKEN}\"}}' --scope project)",
+      "Bash(claude mcp add-json github '{\"type\":\"http\",\"url\":\"https://api.githubcopilot.com/mcp/\",\"headers\":{\"Authorization\":\"Bearer ${GITHUB_TOKEN}\"}}' --scope project 2>&1; echo \"Exit code: $?\")",
+      "mcp__github__issue_write",
+      "mcp__github__add_issue_comment"
     ]
   },
-  "sandbox": {
-    "enabled": false,
-    "autoAllowBashIfSandboxed": false
-  }
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["github"]
 }

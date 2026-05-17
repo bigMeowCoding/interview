@@ -10,6 +10,8 @@ import {
   runInputDeferredSearch,
   runInputSyncSearch,
   runLesson3SyncBurst,
+  runLesson4ForcedReflowBad,
+  runLesson4ForcedReflowGood,
   scheduleLesson3DeferredBurstFinal,
 } from "./state";
 
@@ -80,18 +82,43 @@ describe("performance-panel-demo lesson one state", () => {
     vi.useRealTimers();
   });
 
+  test("runLesson4ForcedReflowBad updates lesson4 bad stats", () => {
+    const stage = document.createElement("div");
+    document.body.appendChild(stage);
+    const ms = runLesson4ForcedReflowBad(stage, 5, 4);
+    expect(ms).toBeGreaterThanOrEqual(0);
+    expect(lessonOneStats.lesson4ReflowBadRuns).toBe(1);
+    expect(lessonOneStats.lesson4ReflowGoodRuns).toBe(0);
+    expect(lessonOneStats.lastScenario).toBe("lesson4-reflow-bad");
+    document.body.removeChild(stage);
+  });
+
+  test("runLesson4ForcedReflowGood updates lesson4 good stats", () => {
+    const stage = document.createElement("div");
+    document.body.appendChild(stage);
+    const ms = runLesson4ForcedReflowGood(stage, 5, 4);
+    expect(ms).toBeGreaterThanOrEqual(0);
+    expect(lessonOneStats.lesson4ReflowGoodRuns).toBe(1);
+    expect(lessonOneStats.lastScenario).toBe("lesson4-reflow-good");
+    document.body.removeChild(stage);
+  });
+
   test("resetLessonOneStats clears all counters", () => {
     runBaselineInteractionBatch(5);
     runHeavyInteractionBatch(5);
     lessonOneStats.chunkedRuns = 3;
     lessonOneStats.inputSyncRuns = 2;
     lessonOneStats.inputDeferredRuns = 2;
+    lessonOneStats.lesson4ReflowBadRuns = 1;
+    lessonOneStats.lesson4ReflowGoodRuns = 1;
     resetLessonOneStats();
     expect(lessonOneStats.baselineRuns).toBe(0);
     expect(lessonOneStats.heavyRuns).toBe(0);
     expect(lessonOneStats.chunkedRuns).toBe(0);
     expect(lessonOneStats.inputSyncRuns).toBe(0);
     expect(lessonOneStats.inputDeferredRuns).toBe(0);
+    expect(lessonOneStats.lesson4ReflowBadRuns).toBe(0);
+    expect(lessonOneStats.lesson4ReflowGoodRuns).toBe(0);
     expect(lessonOneStats.totalInteractions).toBe(0);
     expect(lessonOneStats.lastDurationMs).toBe(0);
     expect(lessonOneStats.lastScenario).toBe("none");

@@ -4,6 +4,8 @@ export interface LessonOneStats {
   chunkedRuns: number;
   inputSyncRuns: number;
   inputDeferredRuns: number;
+  lesson4ReflowBadRuns: number;
+  lesson4ReflowGoodRuns: number;
   totalInteractions: number;
   lastDurationMs: number;
   lastScenario:
@@ -12,6 +14,8 @@ export interface LessonOneStats {
     | "chunked"
     | "input-sync"
     | "input-deferred"
+    | "lesson4-reflow-bad"
+    | "lesson4-reflow-good"
     | "none";
 }
 
@@ -21,6 +25,8 @@ export const lessonOneStats: LessonOneStats = {
   chunkedRuns: 0,
   inputSyncRuns: 0,
   inputDeferredRuns: 0,
+  lesson4ReflowBadRuns: 0,
+  lesson4ReflowGoodRuns: 0,
   totalInteractions: 0,
   lastDurationMs: 0,
   lastScenario: "none",
@@ -279,12 +285,106 @@ export function runInputDeferredSearch(keyword: string): number {
   return duration;
 }
 
+/** 第四课默认小方块数量与外层次数，数值越大 trace 里 Layout 越显眼。 */
+export const LESSON4_BOX_COUNT = 22;
+export const LESSON4_REFLOW_OUTER_LOOPS = 90;
+
+function setupLesson4Boxes(container: HTMLElement, count: number): void {
+  container.replaceChildren();
+  for (let i = 0; i < count; i += 1) {
+    const el = document.createElement("div");
+    el.className = "lesson4-box";
+    el.textContent = String(i);
+    container.appendChild(el);
+  }
+}
+
+/**
+ * 交错读写几何属性：典型 layout thrashing，易在 Performance 里看到密集的 Layout。
+ */
+export function runLesson4ForcedReflowBad(
+  container: HTMLElement,
+  boxCount = LESSON4_BOX_COUNT,
+  outerLoops = LESSON4_REFLOW_OUTER_LOOPS,
+): number {
+  const startMark = "lesson4-bad-start";
+  const endMark = "lesson4-bad-end";
+  const measureName = "lesson4-forced-reflow-bad-duration";
+  markStart(startMark);
+  setupLesson4Boxes(container, boxCount);
+  const nodes = Array.from(
+    container.querySelectorAll<HTMLElement>(".lesson4-box"),
+  );
+  const t0 = performance.now();
+  let checksum = 0;
+  for (let r = 0; r < outerLoops; r += 1) {
+    for (const el of nodes) {
+      const w = el.offsetWidth;
+      el.style.width = `${(w % 120) + 10}px`;
+      checksum += el.offsetHeight % 3;
+    }
+  }
+  if (checksum < 0) {
+    throw new Error("unexpected checksum");
+  }
+  const duration = performance.now() - t0;
+  measureRange(measureName, startMark, endMark);
+  lessonOneStats.lesson4ReflowBadRuns += 1;
+  lessonOneStats.totalInteractions += outerLoops * nodes.length;
+  lessonOneStats.lastDurationMs = duration;
+  lessonOneStats.lastScenario = "lesson4-reflow-bad";
+  return duration;
+}
+
+/**
+ * 先读后写分批：同一轮中先采集几何信息，再统一改 style，减少强制同步布局次数。
+ */
+export function runLesson4ForcedReflowGood(
+  container: HTMLElement,
+  boxCount = LESSON4_BOX_COUNT,
+  outerLoops = LESSON4_REFLOW_OUTER_LOOPS,
+): number {
+  const startMark = "lesson4-good-start";
+  const endMark = "lesson4-good-end";
+  const measureName = "lesson4-forced-reflow-good-duration";
+  markStart(startMark);
+  setupLesson4Boxes(container, boxCount);
+  const nodes = Array.from(
+    container.querySelectorAll<HTMLElement>(".lesson4-box"),
+  );
+  const t0 = performance.now();
+  let checksum = 0;
+  for (let r = 0; r < outerLoops; r += 1) {
+    const snapshot = nodes.map((el) => ({
+      w: el.offsetWidth,
+      h: el.offsetHeight,
+    }));
+    for (let i = 0; i < nodes.length; i += 1) {
+      const { w, h } = snapshot[i]!;
+      nodes[i]!.style.width = `${(w % 120) + 10}px`;
+      checksum += h % 3;
+    }
+  }
+  if (checksum < 0) {
+    throw new Error("unexpected checksum");
+  }
+  const duration = performance.now() - t0;
+  measureRange(measureName, startMark, endMark);
+  lessonOneStats.lesson4ReflowGoodRuns += 1;
+  lessonOneStats.totalInteractions += outerLoops * nodes.length;
+  lessonOneStats.lastDurationMs = duration;
+  lessonOneStats.lastScenario = "lesson4-reflow-good";
+  return duration;
+}
+
 export function resetLessonOneStats(): void {
   lessonOneStats.baselineRuns = 0;
   lessonOneStats.heavyRuns = 0;
   lessonOneStats.chunkedRuns = 0;
   lessonOneStats.inputSyncRuns = 0;
   lessonOneStats.inputDeferredRuns = 0;
+  lessonOneStats.lesson4ReflowBadRuns = 0;
+  lessonOneStats.lesson4ReflowGoodRuns = 0;
   lessonOneStats.totalInteractions = 0;
   lessonOneStats.lastDurationMs = 0;
   lessonOneStats.lastScenario = "none";

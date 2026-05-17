@@ -14,11 +14,66 @@ export const lessonOneStats: LessonOneStats = {
   lastScenario: "none",
 };
 
+function ascendingNumber(a: number, b: number): number {
+  return a - b;
+}
+
+function buildAndSortPayload(seed: number): number[] {
+  const arr: number[] = [];
+  for (let j = 3200; j >= 0; j -= 1) {
+    arr.push((j * (seed + 3)) % 97);
+  }
+  arr.sort(ascendingNumber);
+  return arr;
+}
+
+function scanPayloadRepeatedly(arr: number[]): number {
+  let local = 0;
+  for (let k = 0; k < 8; k += 1) {
+    for (let m = 0; m < arr.length; m += 1) {
+      local += (arr[m] + k) % 11;
+    }
+  }
+  return local;
+}
+
+function blockMainThreadForMs(blockMs: number): number {
+  const blockStart = performance.now();
+  let spin = 0;
+  while (performance.now() - blockStart < blockMs) {
+    spin += 1;
+  }
+  return spin;
+}
+
+function markStart(markName: string): void {
+  if (typeof performance === "undefined") {
+    return;
+  }
+  performance.mark(markName);
+}
+
+function measureRange(
+  measureName: string,
+  startMark: string,
+  endMark: string,
+): void {
+  if (typeof performance === "undefined") {
+    return;
+  }
+  performance.mark(endMark);
+  performance.measure(measureName, startMark, endMark);
+}
+
 /**
  * 第一课只需要“可比样本”。
  * baseline 交互保持轻量，帮助你先熟悉录制区间与时间轴定位。
  */
 export function runBaselineInteractionBatch(iterations = 120): number {
+  const startMark = "lesson1-baseline-start";
+  const endMark = "lesson1-baseline-end";
+  const measureName = "lesson1-baseline-duration";
+  markStart(startMark);
   const start = performance.now();
   let checksum = 0;
   for (let i = 0; i < iterations; i += 1) {
@@ -29,6 +84,7 @@ export function runBaselineInteractionBatch(iterations = 120): number {
     throw new Error("unexpected checksum");
   }
   const duration = performance.now() - start;
+  measureRange(measureName, startMark, endMark);
   lessonOneStats.baselineRuns += 1;
   lessonOneStats.totalInteractions += iterations;
   lessonOneStats.lastDurationMs = duration;
@@ -41,34 +97,25 @@ export function runBaselineInteractionBatch(iterations = 120): number {
  * 方便你在 Flame Chart 里看到可定位的差异。
  */
 export function runHeavyInteractionBatch(iterations = 24): number {
+  const startMark = "lesson1-heavy-start";
+  const endMark = "lesson1-heavy-end";
+  const measureName = "lesson1-heavy-duration";
+  markStart(startMark);
   const start = performance.now();
   let checksum = 0;
   for (let i = 0; i < iterations; i += 1) {
-    const arr: number[] = [];
-    for (let j = 3200; j >= 0; j -= 1) {
-      arr.push((j * (i + 3)) % 97);
-    }
-    // 组合排序 + 多轮扫描，确保主线程上形成稳定可见的 Long Task。
-    arr.sort((a, b) => a - b);
-    let local = 0;
-    for (let k = 0; k < 8; k += 1) {
-      for (let m = 0; m < arr.length; m += 1) {
-        local += (arr[m] + k) % 11;
-      }
-    }
-    checksum += local;
+    const arr = buildAndSortPayload(i);
+    checksum += scanPayloadRepeatedly(arr);
   }
 
-  // 再追加一段固定时长的同步阻塞，避免高性能机器上差异不明显。
-  const blockStart = performance.now();
-  while (performance.now() - blockStart < 120) {
-    checksum += 1;
-  }
+  // 固定同步阻塞，确保高性能机器上仍可见明显长任务。
+  checksum += blockMainThreadForMs(120);
 
   if (checksum < 0) {
     throw new Error("unexpected checksum");
   }
   const duration = performance.now() - start;
+  measureRange(measureName, startMark, endMark);
   lessonOneStats.heavyRuns += 1;
   lessonOneStats.totalInteractions += iterations;
   lessonOneStats.lastDurationMs = duration;

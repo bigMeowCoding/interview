@@ -47,7 +47,9 @@ export default function PerformancePanelDemo() {
         <ol className="steps">
           <li>打开 DevTools → Performance，点击 Record 开始录制。</li>
           <li>点击「Baseline：轻量交互批量执行」一次，然后 Stop。</li>
-          <li>再次 Record，点击「Heavy：主线程压力批量执行」一次，然后 Stop。</li>
+          <li>
+            再次 Record，点击「Heavy：主线程压力批量执行」一次，然后 Stop。
+          </li>
           <li>在两段录制里框选交互区间，比较 Main 线程耗时和长任务长度。</li>
         </ol>
       </section>
@@ -72,7 +74,9 @@ export default function PerformancePanelDemo() {
         <h2>录制辅助统计</h2>
         <div className="stat">Baseline 次数：{lessonOneStats.baselineRuns}</div>
         <div className="stat">Heavy 次数：{lessonOneStats.heavyRuns}</div>
-        <div className="stat">总交互次数：{lessonOneStats.totalInteractions}</div>
+        <div className="stat">
+          总交互次数：{lessonOneStats.totalInteractions}
+        </div>
         <div className="stat">
           最近场景：{lessonOneStats.lastScenario} / 最近耗时：
           {lessonOneStats.lastDurationMs.toFixed(2)}ms
@@ -86,6 +90,21 @@ export default function PerformancePanelDemo() {
           <li>你能在时间轴里框出两段交互区间。</li>
           <li>你能指出 Heavy 相比 Baseline 的主线程耗时上升。</li>
         </ul>
+      </section>
+
+      <section>
+        <h2>定位不到业务代码时怎么办</h2>
+        <ol className="steps">
+          <li>
+            先在 Performance 里查看 User Timing 轨道，搜索
+            lesson1-heavy-duration。
+          </li>
+          <li>
+            在 Bottom-up 里切换 Group by URL，优先看 localhost 源码而非 content
+            script。
+          </li>
+          <li>若仍被插件噪声干扰，先用无痕窗口（禁扩展）再录一遍。</li>
+        </ol>
       </section>
     </main>
   );

@@ -3,14 +3,14 @@
 ## 范围
 
 - 在本地 Vite + React 应用中提供可交互演示，配合 Chrome DevTools **Memory → Heap snapshot** 练习定位常见前端内存泄漏。
-- 讲义以 **5 节渐进课程** 形式呈现，实验区按当前课程高亮相关操作区。
+- 讲义以 **6 节渐进课程** 形式呈现，实验区按当前课程高亮相关操作区。
 
 ## 功能要求
 
-1. **课程导航**：可在第 1～5 课之间切换；支持上一课 / 下一课。
+1. **课程导航**：可在第 1～6 课之间切换；支持上一课 / 下一课。
 2. **每课讲义**：学习目标（学完你会）、Chrome 操作步骤、本课如何使用 Demo、建议操作顺序、自查清单（可勾选）。
-3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课「抽屉开关」**、**第二课「Detached 专一」**、**第三课「监听 + 定时器」**、**第四课「大字符串」**与**第五课「React 挂载副作用」**附带干净/泄漏对照案例；支持 URL `?lesson=N` 直达第 N 课；全局计数与刷新；切换课程不自动清空已制造泄漏。
-4. **可测试**：`state.ts`、第一课抽屉案例、第二课 Detached 案例（`lesson2-detached-case.ts`）、第三课监听/定时器案例（`lesson3-listeners-interval-case.ts`）、第四课大字符串案例（`lesson4-huge-string-case.ts`）、第五课 React 挂载案例（`lesson5-react-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
+3. **实验区**：泄漏制造（React 子组件、Detached DOM、监听、interval、大字符串）与一键修复；**第一课「抽屉开关」**、**第二课「Detached 专一」**、**第三课「监听 + 定时器」**、**第四课「大字符串」**、**第五课「React 挂载副作用」**附带干净/泄漏对照案例；**第六课**附带「疑点源码节选 + 对等干净/泄漏批量」综合演练（与 `lesson6-investigate-case.ts` 一致）；支持 URL `?lesson=N` 直达第 N 课；全局计数与刷新；切换课程不自动清空已制造泄漏。
+4. **可测试**：`state.ts`、第一课抽屉案例（`lesson1-drawer-case.ts`）、第二课 Detached 案例（`lesson2-detached-case.ts`）、第三课监听/定时器案例（`lesson3-listeners-interval-case.ts`）、第四课大字符串案例（`lesson4-huge-string-case.ts`）、第五课 React 挂载案例（`lesson5-react-case.ts`）、第六课综合排查案例（`lesson6-investigate-case.ts`）具备单元测试；课程数据（`curriculum.ts`）具备结构校验测试。
 
 ## 实现映射
 
@@ -25,6 +25,7 @@
 | 第三课 监听 / 定时器对照案例 | `src/react/memory-leak-demo/lesson3-listeners-interval-case.ts` |
 | 第四课 大字符串对照案例 | `src/react/memory-leak-demo/lesson4-huge-string-case.ts` |
 | 第五课 React 挂载对照案例 | `src/react/memory-leak-demo/lesson5-react-case.ts` |
+| 第六课 读源码 / 快照综合案例 | `src/react/memory-leak-demo/lesson6-investigate-case.ts` |
 
 ## 第一课配套案例（可运行）
 
@@ -93,7 +94,21 @@
 
 **第五课要看到的价值**：配套案例先做 **两轮 A/B**，读数应与轮次对齐；再配合「真实挂载/卸载」对比 **React 18 开发态 Strict Mode** 下 effect 可能被双调用导致的计数翻倍，印证 cleanup 必填。最后用修复区逐项回落。
 
-## 五节课内容（讲义）
+## 第六课配套案例（可运行）
+
+**业务隐喻**：迷你通知面板、直播角标等挂载时注册了 `document` 监听与轮询定时器，并把已从文档摘除的面板塞进调试用全局锚点数组。
+
+**页面实验区**：顶部展示疑点源码节选 `setupLiveNotifyPanel`（与真实运行语义一致的三类脚注式写法）；下部按钮与源码中的三处疑点一一对照。
+
+| 按钮 | 行为 |
+|------|------|
+| **重置案例环境** | `resetLeakDemoState()` |
+| **干净：对等 teardown ×15** | 每轮：`document` 监听同步 remove、`setInterval` 同步 clear、`aside` 挂卸后 **不** `pushDetachedNode` |
+| **泄漏：示意面板打开 ×15** | 每轮：`registerLeakyListener(document, click)` + `startLeakyInterval(1500)` + Detached：`aside` remove 后 `pushDetachedNode`；三项计数各 +1 |
+
+**第六课要看到的价值**：先做**静态代码阅读**列出三类怀疑，再通过 **Baseline + Comparison + retaining path** 把怀疑钉到堆里；分项点「移除监听 / clear interval / 清空 Detached」观察哪一类回落，练习「归因确认」闭环。
+
+## 六节课内容（讲义）
 
 以下正文与源码 `src/react/memory-leak-demo/curriculum.ts` 中的 `LESSONS` **逐项对齐**；改课程内容时请同步更新该文件与本 Spec。
 
@@ -294,6 +309,20 @@
 - [ ] 我会在每个订阅类 effect 里问自己：卸载时要 cancel / unsubscribe / clear 吗？  
 - [ ] 我会避免在全局模块级数组里长期 push DOM/React 引用。  
 - [ ] 我能口述 React 18 Strict Mode 开发态下 effect 跑两次时 cleanup 的重要性。
+
+### 第 6 课 · 综合演练：从可疑源码到快照证据
+
+- **副标题**：先读代码找「脚注式」泄漏点，再用 Comparison + retaining path 验证  
+- **实验区高亮**：`manual`、`fix`、`stats`（三区计数）；页内只读源码节选  
+
+**学完你会**
+
+1. 能对着一页业务代码划出：未 teardown 的全局监听、未保存 id 的 `setInterval`、仍被缓存持有的 Detached DOM。  
+2. 会按节奏：重置 → Snapshot A → 重复同一交互 N 次 → Snapshot B → Comparison。  
+3. 会在快照里展开 retaining path，从「谁在持有」倒退到源码中的容器名或模块。  
+4. 理解本 Demo 如何用工件 `state.ts` 衔接「可读示意代码」与堆上的真实 retaining path。
+
+**建议顺序**：见 `curriculum.ts` 中第 6 课 `tryThis`；核心为两轮 ×15（干净 vs 泄漏）Comparison + 分项修复回落。
 
 ---
 

@@ -214,7 +214,8 @@
 .lesson2-case-title,
 .lesson3-case-title,
 .lesson4-case-title,
-.lesson5-case-title {
+.lesson5-case-title,
+.lesson6-case-title {
   margin: 0 0 8px;
   font-size: 0.95rem;
 }
@@ -223,7 +224,8 @@
 .lesson2-case-lead,
 .lesson3-case-lead,
 .lesson4-case-lead,
-.lesson5-case-lead {
+.lesson5-case-lead,
+.lesson6-case-lead {
   margin-top: 0;
 }
 
@@ -233,6 +235,26 @@
 .lesson4-case-steps,
 .lesson5-case-steps {
   margin-bottom: 12px;
+}
+
+.lesson6-case-steps {
+  margin: 12px 0;
+  padding-left: 1.35rem;
+  line-height: 1.5;
+}
+
+.lesson-source-snippet {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e8eaf0;
+  background: #1a1d24;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  white-space: pre;
 }
 
 .lesson-lab-guide {

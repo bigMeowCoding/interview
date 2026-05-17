@@ -171,4 +171,39 @@ export const LESSONS: Lesson[] = [
     ],
     focus: ["react", "fix"],
   },
+  {
+    index: 6,
+    title: "第 6 课 · 综合演练：从可疑源码到快照证据",
+    subtitle:
+      "先读代码找「脚注式」泄漏点，再用 Comparison + retaining path 验证",
+    outcomes: [
+      "能对着一页业务代码划出：未 teardown 的全局监听、未保存 id 的 setInterval、以及仍被缓存持有的 Detached DOM。",
+      "会按固定节奏操作：重置 → Snapshot A → 重复同一交互 N 次 → Snapshot B → Comparison。",
+      "会在快照里点开 retaining path：从「谁在持有」倒退到源码中的容器名 / 模块 / effect。",
+      "理解本 Demo 故意用全局登记（state.ts）桥接示意代码与实际堆条目，便于你在真项目里替换成自己的模块级 Map/数组。",
+    ],
+    chromeSteps: [
+      "实验区阅读「疑点源码」里 setupLiveNotifyPanel 示意版，预想哪三处会与堆增长相关。",
+      "重置案例环境 → 拍 Snapshot A（稳定态基准）。",
+      "点「泄漏：示意面板打开 ×15」→ 拍 Snapshot B → 用 Comparison(B,A)：筛选 HTMLDivElement / Detached / 与闭包相关的条目，观察三类信号是否都与 15 同量级。",
+      "再重置 → Snapshot A′ →「干净：对等 teardown ×15」→ B′ → Comparison：页面三项计数应保持 0，堆上增长应不明显。",
+      "在泄漏 Comparison 中选一条 # New 或 Delta 醒目的节点，展开 retaining path：辨认是否指向监听注册表、interval 数组或 Detached 容器（与本仓库 state.ts 中的登记语义对应）。",
+      "用实验区「移除监听」「clear interval」「清空 Detached」分项尝试 → 再拍快照，确认证据链与读源码时的猜想一致。",
+    ],
+    labGuide:
+      "本课把前几课摞成<strong>一条龙排查剧本</strong>：先静态读代码列出假设，再用堆对比验证，最后用修复按钮做「归因确认」。真实项目里没有本页的计数器，因此更要依赖：同一操作闭环、足够多的重复次数，以及 retaining path 上的模块/global 变量名。若路径指向压缩后的 bundle，可借助 source map 映射回可读源码。",
+    realWorldExample:
+      "常见于「详情浮层」「通知条」「右下角直播提示」等小部件：挂载时顺手 document.addEventListener；轮询草稿忘存 timer id；或为排查 bug 把 panel 塞进 window 上的调试数组。单点一次 QA 看不出来，正式上线后用户在页面里反复进出该流程，堆里就线性淤积。先做静态 code review 找 teardown 对称性，再像本课这样在稳定态前后拍快照，用 Comparison 收口。",
+    tryThis: [
+      "只靠读源码：盖住实验区计数区，仍能口头说出泄漏版 ×15 后堆里大概会多哪几类引用。",
+      "泄漏 ×15 vs 干净 ×15 各一轮 Comparison；在 retaining path 里分别找到「监听」「定时器」「DOM 锚点」相关线索。",
+      "只点「移除监听」再快照，再看仅 clear interval、仅清空 Detached 的差异，体会分项归因。",
+    ],
+    checklist: [
+      "我会把「卸载 / 路由离开 / 弹层关闭」当作必须写 teardown 的时机。",
+      "我会先在源码里 grep addEventListener、setInterval、push( 等模式，再上堆佐证。",
+      "我知道 retaining path 是连接「堆里对象」与「业务变量名」的最后一公里。",
+    ],
+    focus: ["manual", "fix", "stats"],
+  },
 ];

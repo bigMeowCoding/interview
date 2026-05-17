@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import MemoryLeakDemo from "./memory-leak-demo/MemoryLeakDemo";
+import PerformancePanelDemo from "./performance-panel-demo/PerformancePanelDemo";
 // import RouterDemo from "./router";
 // import HashRouterDemo from "./router/hash-index";
 // import ReduxDemo from "./redux";
@@ -16,7 +16,7 @@ const root = createRoot(rootEl);
 
 root.render(
   <>
-    <MemoryLeakDemo />
+    <PerformancePanelDemo />
     {/* import RouterDemo from "./router" 后可切换 */}
     {/*  <HashRouterDemo/>*/}
     {/*<ReduxDemo />*/}

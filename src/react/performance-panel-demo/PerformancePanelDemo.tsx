@@ -1,139 +1,129 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import "./style.css";
 import {
-  LESSON4_BOX_COUNT,
-  LESSON4_REFLOW_OUTER_LOOPS,
-  lessonOneStats,
-  resetLessonOneStats,
-  runLesson4ForcedReflowBad,
-  runLesson4ForcedReflowGood,
-} from "./state";
+  LESSON5_PARENT_TICK_MS,
+  Lesson5BadBlock,
+  Lesson5GoodBlock,
+} from "./Lesson5Scenarios";
+import { lessonOneStats, resetLessonOneStats } from "./state";
+
+type Lesson5Mode = "idle" | "bad" | "good";
 
 export default function PerformancePanelDemo() {
-  const stageRef = useRef<HTMLDivElement | null>(null);
-  const [lastHint, setLastHint] = useState(
-    "先录「交错读写」，再录「先读后写」，对比 Main 里的 Layout。",
+  const [mode, setMode] = useState<Lesson5Mode>("idle");
+  const [hint, setHint] = useState(
+    "先录「糟糕场景」约 3～5 秒再 Stop；重置后再录「对照场景」同样时长。",
   );
-  const [badMs, setBadMs] = useState<number | null>(null);
-  const [goodMs, setGoodMs] = useState<number | null>(null);
 
-  const runBad = useCallback(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const ms = runLesson4ForcedReflowBad(
-      el,
-      LESSON4_BOX_COUNT,
-      LESSON4_REFLOW_OUTER_LOOPS,
-    );
-    setBadMs(ms);
-    setLastHint(
-      `交错读写完成：约 ${ms.toFixed(1)}ms。User Timing：lesson4-forced-reflow-bad-duration。`,
-    );
-  }, []);
-
-  const runGood = useCallback(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const ms = runLesson4ForcedReflowGood(
-      el,
-      LESSON4_BOX_COUNT,
-      LESSON4_REFLOW_OUTER_LOOPS,
-    );
-    setGoodMs(ms);
-    setLastHint(
-      `先读后写完成：约 ${ms.toFixed(1)}ms。User Timing：lesson4-forced-reflow-good-duration。同机对比耗时应低于坏版本。`,
-    );
-  }, []);
-
-  const reset = useCallback(() => {
+  const chooseBad = useCallback(() => {
     resetLessonOneStats();
-    if (stageRef.current) {
-      stageRef.current.replaceChildren();
-    }
-    setBadMs(null);
-    setGoodMs(null);
-    setLastHint("已重置统计与舞台，可重新录制。");
+    setMode("bad");
+    setHint(
+      "已挂载糟糕场景：User Timing 里应出现大量 lesson5-bad-child-render。录制结束后可看「糟糕路径重活次数」。",
+    );
+  }, []);
+
+  const chooseGood = useCallback(() => {
+    resetLessonOneStats();
+    setMode("good");
+    setHint(
+      "已挂载对照场景：lesson5-good-child-render 应极少（开发态 React StrictMode 可能多 1～2 次 mount）。",
+    );
+  }, []);
+
+  const stopAll = useCallback(() => {
+    setMode("idle");
+    resetLessonOneStats();
+    setHint("已停止并清空统计，可重新开始录制流程。");
   }, []);
 
   return (
     <main className="performance-panel-demo">
-      <h1>Chrome Performance · 第四课</h1>
+      <h1>Chrome Performance · 第五课</h1>
       <p className="sub">
-        <strong>Rendering：</strong>
-        观察强制同步布局（layout thrashing）。坏代码在循环里交替读 offset 与写
-        style；好代码在一轮里先读完再写。
+        <strong>React：</strong>
+        父组件高频 <code>setState</code> 时，子组件若每次跟着{" "}
+        <code>render</code> 做同步重活，会在 Main 线程上堆出密集短任务；用{" "}
+        <code>memo</code> 与<strong>稳定的 props</strong>（不把 tick
+        传下去）可大幅削减无效渲染。
       </p>
 
       <section>
         <h2>跟着做</h2>
         <ol className="steps">
           <li>
-            Performance → Record → 点「交错读写（易抖）」→ Stop。展开 Main，留意
-            紫色 <strong>Layout</strong> 是否又碎又长。
+            Performance → Record → 点「挂载糟糕场景」→ 让页面跑 3～5 秒 → Stop。
           </li>
           <li>
-            再录一次 → 点「先读后写（对照）」→
-            Stop。对比同机两次「脚本总耗时」与 Layout 密度。
+            点「停止并重置」→ 再 Record → 点「挂载对照场景」→ 同样录 3～5 秒 →
+            Stop。
           </li>
           <li>
-            User Timing 里搜 <code>lesson4-forced-reflow-bad-duration</code> 与{" "}
-            <code>lesson4-forced-reflow-good-duration</code>。
+            对比 User Timing：<code>lesson5-bad-child-render</code> 条数 ≫{" "}
+            <code>lesson5-good-child-render</code>；并对照下方统计。
           </li>
         </ol>
+        <p className="mini-hint">
+          父组件定时器间隔 {LESSON5_PARENT_TICK_MS}
+          ms；与源码 <code>LESSON5_PARENT_TICK_MS</code> 一致。
+        </p>
       </section>
 
       <section className="lesson3-lab">
         <h2>实验区</h2>
-        <p className="mini-hint">
-          参数：{LESSON4_BOX_COUNT} 个节点 × {LESSON4_REFLOW_OUTER_LOOPS}{" "}
-          轮；数值与源码中常量一致，可自行调整复现实验。
-        </p>
         <div className="btn-row lesson3-demo-burst">
-          <button type="button" className="danger" onClick={runBad}>
-            交错读写（易抖）— 录制先点这个
+          <button
+            type="button"
+            className="danger"
+            disabled={mode === "bad"}
+            onClick={chooseBad}
+          >
+            挂载糟糕场景（录制先用这个）
           </button>
-          <button type="button" className="secondary" onClick={runGood}>
-            先读后写（对照）— 再录这个
+          <button
+            type="button"
+            className="secondary"
+            disabled={mode === "good"}
+            onClick={chooseGood}
+          >
+            挂载对照场景（memo + 稳定 props）
           </button>
-          <button type="button" className="fix" onClick={reset}>
-            重置
+          <button type="button" className="fix" onClick={stopAll}>
+            停止并重置
           </button>
         </div>
-        <div
-          ref={stageRef}
-          className="lesson4-stage"
-          aria-label="布局抖动演示节点容器"
-        />
-        <p className="hint">{lastHint}</p>
-        {badMs != null || goodMs != null ? (
-          <p className="hint muted">
-            本机最近一次：坏版 {badMs != null ? `${badMs.toFixed(1)}ms` : "—"} ·
-            好版 {goodMs != null ? `${goodMs.toFixed(1)}ms` : "—"}（以
-            Performance 录制为准）
-          </p>
+
+        {mode === "bad" ? <Lesson5BadBlock /> : null}
+        {mode === "good" ? <Lesson5GoodBlock /> : null}
+        {mode === "idle" ? (
+          <p className="hint muted">当前未挂载场景。请选择上方按钮开始。</p>
         ) : null}
+
+        <p className="hint">{hint}</p>
       </section>
 
       <section className="stats">
         <h2>本课统计</h2>
         <div className="stat">
-          交错读写次数：{lessonOneStats.lesson4ReflowBadRuns}
+          糟糕路径子组件重活次数：{lessonOneStats.lesson5BadChildWorkRuns}
         </div>
         <div className="stat">
-          先读后写次数：{lessonOneStats.lesson4ReflowGoodRuns}
+          对照路径子组件重活次数：{lessonOneStats.lesson5GoodChildWorkRuns}
         </div>
-        <div className="stat">
-          最近场景：{lessonOneStats.lastScenario} / 最近耗时：
-          {lessonOneStats.lastDurationMs.toFixed(1)}ms
-        </div>
+        <div className="stat">最近场景标记：{lessonOneStats.lastScenario}</div>
       </section>
 
       <section>
         <h2>过关标准</h2>
         <ul className="checklist">
-          <li>能说出「读几何 → 写 style → 再读」为何会反复触发布局。</li>
-          <li>能说出优化思路：批量读、批量写、减少强制同步布局。</li>
-          <li>能用两次录制作证：好版本 Layout/总耗时应优于坏版本（同机）。</li>
+          <li>
+            能解释：父组件更新为何会导致子组件 render（props 引用或值变化）。
+          </li>
+          <li>
+            能说明：<code>memo</code> 在什么条件下会跳过更新（props
+            浅比较不变）。
+          </li>
+          <li>能用两次录制说明：减少无效渲染可直接减少主线程脚本压力。</li>
         </ul>
       </section>
     </main>

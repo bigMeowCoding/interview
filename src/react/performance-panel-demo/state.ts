@@ -6,6 +6,8 @@ export interface LessonOneStats {
   inputDeferredRuns: number;
   lesson4ReflowBadRuns: number;
   lesson4ReflowGoodRuns: number;
+  lesson5BadChildWorkRuns: number;
+  lesson5GoodChildWorkRuns: number;
   totalInteractions: number;
   lastDurationMs: number;
   lastScenario:
@@ -16,6 +18,8 @@ export interface LessonOneStats {
     | "input-deferred"
     | "lesson4-reflow-bad"
     | "lesson4-reflow-good"
+    | "lesson5-bad-child"
+    | "lesson5-good-child"
     | "none";
 }
 
@@ -27,6 +31,8 @@ export const lessonOneStats: LessonOneStats = {
   inputDeferredRuns: 0,
   lesson4ReflowBadRuns: 0,
   lesson4ReflowGoodRuns: 0,
+  lesson5BadChildWorkRuns: 0,
+  lesson5GoodChildWorkRuns: 0,
   totalInteractions: 0,
   lastDurationMs: 0,
   lastScenario: "none",
@@ -377,6 +383,32 @@ export function runLesson4ForcedReflowGood(
   return duration;
 }
 
+/** 单次子组件 render 内同步阻塞时长（毫秒），与 Performance 中短任务视觉匹配。 */
+export const LESSON5_CHILD_BLOCK_MS = 11;
+
+export function runLesson5ChildRenderWork(kind: "bad" | "good"): void {
+  const measureName =
+    kind === "bad" ? "lesson5-bad-child-render" : "lesson5-good-child-render";
+  const startMark = `${measureName}-start-${performance.now()}`;
+  const endMark = `${measureName}-end-${performance.now()}`;
+  markStart(startMark);
+  let spin = 0;
+  spin += blockMainThreadForMs(LESSON5_CHILD_BLOCK_MS);
+  if (spin < 0) {
+    throw new Error("unexpected spin");
+  }
+  measureRange(measureName, startMark, endMark);
+  if (kind === "bad") {
+    lessonOneStats.lesson5BadChildWorkRuns += 1;
+    lessonOneStats.lastScenario = "lesson5-bad-child";
+  } else {
+    lessonOneStats.lesson5GoodChildWorkRuns += 1;
+    lessonOneStats.lastScenario = "lesson5-good-child";
+  }
+  lessonOneStats.totalInteractions += 1;
+  lessonOneStats.lastDurationMs = LESSON5_CHILD_BLOCK_MS;
+}
+
 export function resetLessonOneStats(): void {
   lessonOneStats.baselineRuns = 0;
   lessonOneStats.heavyRuns = 0;
@@ -385,6 +417,8 @@ export function resetLessonOneStats(): void {
   lessonOneStats.inputDeferredRuns = 0;
   lessonOneStats.lesson4ReflowBadRuns = 0;
   lessonOneStats.lesson4ReflowGoodRuns = 0;
+  lessonOneStats.lesson5BadChildWorkRuns = 0;
+  lessonOneStats.lesson5GoodChildWorkRuns = 0;
   lessonOneStats.totalInteractions = 0;
   lessonOneStats.lastDurationMs = 0;
   lessonOneStats.lastScenario = "none";

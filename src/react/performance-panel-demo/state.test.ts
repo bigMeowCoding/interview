@@ -12,6 +12,7 @@ import {
   runLesson3SyncBurst,
   runLesson4ForcedReflowBad,
   runLesson4ForcedReflowGood,
+  runLesson5ChildRenderWork,
   scheduleLesson3DeferredBurstFinal,
 } from "./state";
 
@@ -103,6 +104,15 @@ describe("performance-panel-demo lesson one state", () => {
     document.body.removeChild(stage);
   });
 
+  test("runLesson5ChildRenderWork updates bad and good counters", () => {
+    runLesson5ChildRenderWork("bad");
+    expect(lessonOneStats.lesson5BadChildWorkRuns).toBe(1);
+    expect(lessonOneStats.lesson5GoodChildWorkRuns).toBe(0);
+    runLesson5ChildRenderWork("good");
+    expect(lessonOneStats.lesson5GoodChildWorkRuns).toBe(1);
+    expect(lessonOneStats.lastScenario).toBe("lesson5-good-child");
+  });
+
   test("resetLessonOneStats clears all counters", () => {
     runBaselineInteractionBatch(5);
     runHeavyInteractionBatch(5);
@@ -111,6 +121,8 @@ describe("performance-panel-demo lesson one state", () => {
     lessonOneStats.inputDeferredRuns = 2;
     lessonOneStats.lesson4ReflowBadRuns = 1;
     lessonOneStats.lesson4ReflowGoodRuns = 1;
+    lessonOneStats.lesson5BadChildWorkRuns = 2;
+    lessonOneStats.lesson5GoodChildWorkRuns = 3;
     resetLessonOneStats();
     expect(lessonOneStats.baselineRuns).toBe(0);
     expect(lessonOneStats.heavyRuns).toBe(0);
@@ -119,6 +131,8 @@ describe("performance-panel-demo lesson one state", () => {
     expect(lessonOneStats.inputDeferredRuns).toBe(0);
     expect(lessonOneStats.lesson4ReflowBadRuns).toBe(0);
     expect(lessonOneStats.lesson4ReflowGoodRuns).toBe(0);
+    expect(lessonOneStats.lesson5BadChildWorkRuns).toBe(0);
+    expect(lessonOneStats.lesson5GoodChildWorkRuns).toBe(0);
     expect(lessonOneStats.totalInteractions).toBe(0);
     expect(lessonOneStats.lastDurationMs).toBe(0);
     expect(lessonOneStats.lastScenario).toBe("none");

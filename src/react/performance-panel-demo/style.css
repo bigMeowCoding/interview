@@ -163,3 +163,40 @@
   text-align: center;
   background: #fff;
 }
+
+.performance-panel-demo .lesson5-scenario {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.performance-panel-demo .lesson5-scenario.bad {
+  border-color: #f5c6c6;
+  background: #fff5f5;
+}
+
+.performance-panel-demo .lesson5-scenario.good {
+  border-color: #99d5cf;
+  background: #f0fdfa;
+}
+
+.performance-panel-demo .lesson5-child-tag {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.performance-panel-demo .lesson5-child-tag.bad {
+  background: #fde8e8;
+  color: #9b2c2c;
+}
+
+.performance-panel-demo .lesson5-child-tag.good {
+  background: #d1fae5;
+  color: #065f46;
+}

@@ -1,129 +1,82 @@
-import { useCallback, useState } from "react";
 import "./style.css";
-import {
-  LESSON5_PARENT_TICK_MS,
-  Lesson5BadBlock,
-  Lesson5GoodBlock,
-} from "./Lesson5Scenarios";
-import { lessonOneStats, resetLessonOneStats } from "./state";
-
-type Lesson5Mode = "idle" | "bad" | "good";
+import { Lesson6Integrated } from "./Lesson6Integrated";
+import { lessonOneStats } from "./state";
 
 export default function PerformancePanelDemo() {
-  const [mode, setMode] = useState<Lesson5Mode>("idle");
-  const [hint, setHint] = useState(
-    "先录「糟糕场景」约 3～5 秒再 Stop；重置后再录「对照场景」同样时长。",
-  );
-
-  const chooseBad = useCallback(() => {
-    resetLessonOneStats();
-    setMode("bad");
-    setHint(
-      "已挂载糟糕场景：User Timing 里应出现大量 lesson5-bad-child-render。录制结束后可看「糟糕路径重活次数」。",
-    );
-  }, []);
-
-  const chooseGood = useCallback(() => {
-    resetLessonOneStats();
-    setMode("good");
-    setHint(
-      "已挂载对照场景：lesson5-good-child-render 应极少（开发态 React StrictMode 可能多 1～2 次 mount）。",
-    );
-  }, []);
-
-  const stopAll = useCallback(() => {
-    setMode("idle");
-    resetLessonOneStats();
-    setHint("已停止并清空统计，可重新开始录制流程。");
-  }, []);
-
   return (
     <main className="performance-panel-demo">
-      <h1>Chrome Performance · 第五课</h1>
+      <h1>Chrome Performance · 第六课（综合演练）</h1>
       <p className="sub">
-        <strong>React：</strong>
-        父组件高频 <code>setState</code> 时，子组件若每次跟着{" "}
-        <code>render</code> 做同步重活，会在 Main 线程上堆出密集短任务；用{" "}
-        <code>memo</code> 与<strong>稳定的 props</strong>（不把 tick
-        传下去）可大幅削减无效渲染。
+        把前几课的现象<strong>叠在一张「假业务页」里</strong>
+        ：无效渲染、输入防抖、布局读写交错。 你要做的是
+        <strong>两次完整录制</strong>（问题版 →
+        优化版），自己写一份可复现的结论。
       </p>
 
       <section>
-        <h2>跟着做</h2>
+        <h2>任务说明</h2>
         <ol className="steps">
           <li>
-            Performance → Record → 点「挂载糟糕场景」→ 让页面跑 3～5 秒 → Stop。
+            <strong>基准</strong>：Performance → Record → 选中「问题版套件」→
+            让页面跑 30～60 秒：在搜索框里随意输入；可点 1～2
+            次「交错读写布局」。
           </li>
           <li>
-            点「停止并重置」→ 再 Record → 点「挂载对照场景」→ 同样录 3～5 秒 →
-            Stop。
+            <strong>复测</strong>：停止 → 选中「优化版套件」→
+            再录同样时长，操作尽量一致。
           </li>
           <li>
-            对比 User Timing：<code>lesson5-bad-child-render</code> 条数 ≫{" "}
-            <code>lesson5-good-child-render</code>；并对照下方统计。
+            <strong>交付物</strong>：按下方「结业清单」填完；保存两次
+            trace（可选）或关键截图。
           </li>
         </ol>
-        <p className="mini-hint">
-          父组件定时器间隔 {LESSON5_PARENT_TICK_MS}
-          ms；与源码 <code>LESSON5_PARENT_TICK_MS</code> 一致。
-        </p>
       </section>
 
       <section className="lesson3-lab">
-        <h2>实验区</h2>
-        <div className="btn-row lesson3-demo-burst">
-          <button
-            type="button"
-            className="danger"
-            disabled={mode === "bad"}
-            onClick={chooseBad}
-          >
-            挂载糟糕场景（录制先用这个）
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            disabled={mode === "good"}
-            onClick={chooseGood}
-          >
-            挂载对照场景（memo + 稳定 props）
-          </button>
-          <button type="button" className="fix" onClick={stopAll}>
-            停止并重置
-          </button>
-        </div>
-
-        {mode === "bad" ? <Lesson5BadBlock /> : null}
-        {mode === "good" ? <Lesson5GoodBlock /> : null}
-        {mode === "idle" ? (
-          <p className="hint muted">当前未挂载场景。请选择上方按钮开始。</p>
-        ) : null}
-
-        <p className="hint">{hint}</p>
+        <h2>综合实验区</h2>
+        <Lesson6Integrated />
       </section>
 
       <section className="stats">
-        <h2>本课统计</h2>
+        <h2>统计快照（辅助，以录屏为准）</h2>
         <div className="stat">
-          糟糕路径子组件重活次数：{lessonOneStats.lesson5BadChildWorkRuns}
+          lesson5 糟糕重活：{lessonOneStats.lesson5BadChildWorkRuns} · 对照：{" "}
+          {lessonOneStats.lesson5GoodChildWorkRuns}
         </div>
         <div className="stat">
-          对照路径子组件重活次数：{lessonOneStats.lesson5GoodChildWorkRuns}
+          lesson3 同步搜索次数：{lessonOneStats.inputSyncRuns} · 防抖次数：{" "}
+          {lessonOneStats.inputDeferredRuns}
         </div>
-        <div className="stat">最近场景标记：{lessonOneStats.lastScenario}</div>
+        <div className="stat">
+          lesson4 交错读写：{lessonOneStats.lesson4ReflowBadRuns} · 先读后写：{" "}
+          {lessonOneStats.lesson4ReflowGoodRuns}
+        </div>
       </section>
 
       <section>
-        <h2>过关标准</h2>
+        <h2>结业清单（请自拟要点填在笔记里）</h2>
         <ul className="checklist">
           <li>
-            能解释：父组件更新为何会导致子组件 render（props 引用或值变化）。
+            <strong>现象</strong>：用户感知是输入卡、动画抖、还是整页停顿？
           </li>
           <li>
-            能说明：<code>memo</code> 在什么条件下会跳过更新（props
-            浅比较不变）。
+            <strong>证据</strong>：Main 上 Scripting / Layout 哪类偏多？User
+            Timing 里哪些 measure 条数差异最大？
           </li>
-          <li>能用两次录制说明：减少无效渲染可直接减少主线程脚本压力。</li>
+          <li>
+            <strong>根因</strong>：对应第几课模型（无效 render / 防抖 /
+            强制同步布局）？
+          </li>
+          <li>
+            <strong>方案</strong>：优化版套件分别用了什么手段（可对照源码）？
+          </li>
+          <li>
+            <strong>收益与风险</strong>
+            ：同机对比结论；若引入防抖，交互上有什么取舍？
+          </li>
+          <li>
+            <strong>继续优化</strong>：若还要压 INP，你下一步会查什么？
+          </li>
         </ul>
       </section>
     </main>

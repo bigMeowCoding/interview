@@ -200,3 +200,45 @@
   background: #d1fae5;
   color: #065f46;
 }
+
+.performance-panel-demo .lesson6-wrap {
+  margin-top: 4px;
+}
+
+.performance-panel-demo .lesson6-kit-row {
+  margin-bottom: 8px;
+}
+
+.performance-panel-demo .lesson6-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.performance-panel-demo .lesson6-subcard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.performance-panel-demo .lesson6-subcard-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.performance-panel-demo .lesson6-subcard input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.performance-panel-demo .lesson6-layout-stage {
+  margin-top: 12px;
+  min-height: 80px;
+}

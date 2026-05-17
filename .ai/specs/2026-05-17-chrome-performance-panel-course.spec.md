@@ -72,7 +72,7 @@
 - 学会验证常见优化手段（`memo`、稳定引用、状态下沉/拆分）是否真正带来收益。
 - 本课完成标准：至少完成一个组件级优化，并用前后录制证明主线程耗时或渲染次数下降。
 
-#### 第 5 课 · 讲稿要点与实现对照（当前 `PerformancePanelDemo` 为第五课）
+#### 第 5 课 · 讲稿要点与实现对照（场景组件；综合课中复用）
 
 - **要证明什么**：父组件**高频** `setState`（如 `setInterval` 更新 `tick`）时，若子组件**每次随父 render** 都执行同步重活，Main 线程会出现大量与 render 次数成正比的短任务；通过 **`React.memo` + 不把高频 state 作为子组件 props**（子只接收稳定字面量或稳定引用），可让子组件在父更新时**跳过 render**，重活次数急剧下降。
 - **糟糕场景**：`Lesson5BadBlock` → `UnstableHeavyChild` 接收 `tick`，每次变化必 render；render 内调用 `runLesson5ChildRenderWork("bad")`（内含 `blockMainThreadForMs` + User Timing）。
@@ -88,12 +88,20 @@
 - 输出结构化结论：问题现象、证据截图、根因描述、修复方案、收益数据、剩余风险。
 - 本课完成标准：结论可被他人复现，且包含明确的“继续优化建议”。
 
+#### 第 6 课 · 讲稿要点与实现对照（当前 `PerformancePanelDemo` 为第六课）
+
+- **页面形态**：`Lesson6Integrated` 提供两套互斥套件 — **问题版** 叠加第五课糟糕块、第三课同步搜索、`runLesson4ForcedReflowBad`；**优化版** 叠加第五课对照块、防抖搜索、`runLesson4ForcedReflowGood`。切换套件时调用 `resetLessonOneStats()`。
+- **练习流程**：同机、同操作强度下各录一段 Performance（建议 30～60 秒，含搜索与可选布局按钮）；页面正文含**结业清单**提示交付结构。
+- **证据**：综合对比 `lesson5-*`、`lesson3-input-*`、`lesson4-forced-reflow-*` 等 User Timing 与 Main 上 Scripting/Layout；`lessonOneStats` 各计数作辅助。
+- **验收**：学习者能自拟笔记填完「现象 / 证据 / 根因 / 方案 / 收益风险 / 继续优化」，且他人可按页面步骤复现两次录制。
+
 ## 实现映射（与当前仓库一致，随迭代更新）
 
 | 区域 | 路径 | 说明 |
 |------|------|------|
-| 页面与交互 | `src/react/performance-panel-demo/PerformancePanelDemo.tsx` | **当前默认页为第 5 课**（糟糕 vs `memo` 对照）；挂载/停止/重置流程见按钮文案。 |
-| 第五课场景组件 | `src/react/performance-panel-demo/Lesson5Scenarios.tsx` | `Lesson5BadBlock`、`Lesson5GoodBlock`、`LESSON5_PARENT_TICK_MS`。 |
+| 页面与交互 | `src/react/performance-panel-demo/PerformancePanelDemo.tsx` | **当前默认页为第 6 课**（综合演练 + 结业清单）。 |
+| 第六课综合区 | `src/react/performance-panel-demo/Lesson6Integrated.tsx` | 问题版 / 优化版套件切换，组合 L3/L4/L5 能力。 |
+| 第五课场景组件 | `src/react/performance-panel-demo/Lesson5Scenarios.tsx` | 被第六课复用。 |
 | 状态与用户 Timing | `src/react/performance-panel-demo/state.ts` | 第 1～2 课：`runBaselineInteractionBatch`、`runHeavyInteractionBatch`、`runChunkedHeavyInteractionBatch`；第 3 课：输入与防抖相关函数；第 4 课：`runLesson4ForcedReflowBad` / `runLesson4ForcedReflowGood`；第 5 课：`runLesson5ChildRenderWork` 与 `lesson5BadChildWorkRuns` / `lesson5GoodChildWorkRuns`；汇总 `lessonOneStats`、`resetLessonOneStats`。 |
 | 样式 | `src/react/performance-panel-demo/style.css` | 含第五课 `.lesson5-scenario` / `.lesson5-child-tag` 等；第四课布局抖动样式仍保留。 |
 | 单元测试 | `src/react/performance-panel-demo/state.test.ts` | 覆盖上述 state 行为与统计重置。 |

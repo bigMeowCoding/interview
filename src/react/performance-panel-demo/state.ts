@@ -2,15 +2,25 @@ export interface LessonOneStats {
   baselineRuns: number;
   heavyRuns: number;
   chunkedRuns: number;
+  inputSyncRuns: number;
+  inputDeferredRuns: number;
   totalInteractions: number;
   lastDurationMs: number;
-  lastScenario: "baseline" | "heavy" | "chunked" | "none";
+  lastScenario:
+    | "baseline"
+    | "heavy"
+    | "chunked"
+    | "input-sync"
+    | "input-deferred"
+    | "none";
 }
 
 export const lessonOneStats: LessonOneStats = {
   baselineRuns: 0,
   heavyRuns: 0,
   chunkedRuns: 0,
+  inputSyncRuns: 0,
+  inputDeferredRuns: 0,
   totalInteractions: 0,
   lastDurationMs: 0,
   lastScenario: "none",
@@ -46,6 +56,65 @@ function blockMainThreadForMs(blockMs: number): number {
     spin += 1;
   }
   return spin;
+}
+
+/**
+ * 故意做成「每次调用都明显吃主线程」：
+ * 否则在快机器上单次 onChange 只有亚毫秒级，同步和防抖看起来像没区别。
+ * 对比时请看：同步录制里 User Timing `lesson3-input-sync-duration` 出现次数 ≈ 键入次数；
+ * 防抖录制里 `lesson3-input-deferred-duration` 通常只出现 1 次（停手后）。
+ */
+function simulateSearchWorkload(keyword: string, rounds = 24_000): number {
+  const base = keyword.length > 0 ? keyword : "demo";
+  let score = 0;
+  for (let i = 0; i < rounds; i += 1) {
+    const payload = `${base}-${i}-${base.repeat(2)}`;
+    score += payload.includes(base) ? 1 : 0;
+    score += (i * 17) % 13;
+  }
+  // 固定阻塞：保证单次重算在 Performance 里是「粗」的黄色条，手打也能感到顿。
+  score += blockMainThreadForMs(52);
+  return score;
+}
+
+/** 与实验区 input 防抖一致，便于「一键防抖演示」和真实输入对照。 */
+export const LESSON3_INPUT_DEBOUNCE_MS = 400;
+
+/**
+ * 同步连跑多次重算：模拟极快连击，中间没有任何让出。
+ * 录制时点一下即可看到多条 lesson3-input-sync-duration。
+ */
+export function runLesson3SyncBurst(steps = 8): void {
+  for (let i = 1; i <= steps; i += 1) {
+    runInputSyncSearch(`lesson3-burst-${i}`);
+  }
+}
+
+/**
+ * 模拟连续 8 次「只差最后一个字符」的防抖输入：每次都 clearTimeout 再设新的，
+ * 最后只会执行一次 runInputDeferredSearch。
+ */
+export function scheduleLesson3DeferredBurstFinal(
+  steps = 8,
+  debounceMs = LESSON3_INPUT_DEBOUNCE_MS,
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    let id: number | null = null;
+    for (let i = 1; i <= steps; i += 1) {
+      if (id != null) {
+        window.clearTimeout(id);
+      }
+      const keyword = `lesson3-burst-${i}`;
+      id = window.setTimeout(() => {
+        try {
+          const ms = runInputDeferredSearch(keyword);
+          resolve(ms);
+        } catch (e) {
+          reject(e instanceof Error ? e : new Error(String(e)));
+        }
+      }, debounceMs);
+    }
+  });
 }
 
 function yieldToMainThread(): Promise<void> {
@@ -172,10 +241,50 @@ export async function runChunkedHeavyInteractionBatch(
   return duration;
 }
 
+export function runInputSyncSearch(keyword: string): number {
+  const startMark = "lesson3-input-sync-start";
+  const endMark = "lesson3-input-sync-end";
+  const measureName = "lesson3-input-sync-duration";
+  markStart(startMark);
+  const start = performance.now();
+  const score = simulateSearchWorkload(keyword);
+  if (score < 0) {
+    throw new Error("unexpected score");
+  }
+  const duration = performance.now() - start;
+  measureRange(measureName, startMark, endMark);
+  lessonOneStats.inputSyncRuns += 1;
+  lessonOneStats.totalInteractions += 1;
+  lessonOneStats.lastDurationMs = duration;
+  lessonOneStats.lastScenario = "input-sync";
+  return duration;
+}
+
+export function runInputDeferredSearch(keyword: string): number {
+  const startMark = "lesson3-input-deferred-start";
+  const endMark = "lesson3-input-deferred-end";
+  const measureName = "lesson3-input-deferred-duration";
+  markStart(startMark);
+  const start = performance.now();
+  const score = simulateSearchWorkload(keyword);
+  if (score < 0) {
+    throw new Error("unexpected score");
+  }
+  const duration = performance.now() - start;
+  measureRange(measureName, startMark, endMark);
+  lessonOneStats.inputDeferredRuns += 1;
+  lessonOneStats.totalInteractions += 1;
+  lessonOneStats.lastDurationMs = duration;
+  lessonOneStats.lastScenario = "input-deferred";
+  return duration;
+}
+
 export function resetLessonOneStats(): void {
   lessonOneStats.baselineRuns = 0;
   lessonOneStats.heavyRuns = 0;
   lessonOneStats.chunkedRuns = 0;
+  lessonOneStats.inputSyncRuns = 0;
+  lessonOneStats.inputDeferredRuns = 0;
   lessonOneStats.totalInteractions = 0;
   lessonOneStats.lastDurationMs = 0;
   lessonOneStats.lastScenario = "none";

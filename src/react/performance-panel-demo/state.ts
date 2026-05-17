@@ -1,14 +1,16 @@
 export interface LessonOneStats {
   baselineRuns: number;
   heavyRuns: number;
+  chunkedRuns: number;
   totalInteractions: number;
   lastDurationMs: number;
-  lastScenario: "baseline" | "heavy" | "none";
+  lastScenario: "baseline" | "heavy" | "chunked" | "none";
 }
 
 export const lessonOneStats: LessonOneStats = {
   baselineRuns: 0,
   heavyRuns: 0,
+  chunkedRuns: 0,
   totalInteractions: 0,
   lastDurationMs: 0,
   lastScenario: "none",
@@ -44,6 +46,12 @@ function blockMainThreadForMs(blockMs: number): number {
     spin += 1;
   }
   return spin;
+}
+
+function yieldToMainThread(): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(() => resolve(), 0);
+  });
 }
 
 function markStart(markName: string): void {
@@ -123,9 +131,51 @@ export function runHeavyInteractionBatch(iterations = 24): number {
   return duration;
 }
 
+/**
+ * 第二课：把原本单段阻塞拆成多个 chunk，中间主动让出主线程。
+ * 这样在 Performance 里会从“一个长任务”变成“多个短任务”。
+ */
+export async function runChunkedHeavyInteractionBatch(
+  iterations = 24,
+  chunkSize = 4,
+): Promise<number> {
+  const startMark = "lesson2-chunked-start";
+  const endMark = "lesson2-chunked-end";
+  const measureName = "lesson2-chunked-duration";
+  markStart(startMark);
+  const start = performance.now();
+  let checksum = 0;
+
+  for (let i = 0; i < iterations; i += chunkSize) {
+    const chunkEnd = Math.min(i + chunkSize, iterations);
+    for (let idx = i; idx < chunkEnd; idx += 1) {
+      const arr = buildAndSortPayload(idx);
+      checksum += scanPayloadRepeatedly(arr);
+    }
+    await yieldToMainThread();
+  }
+
+  for (let elapsed = 0; elapsed < 120; elapsed += 12) {
+    checksum += blockMainThreadForMs(12);
+    await yieldToMainThread();
+  }
+
+  if (checksum < 0) {
+    throw new Error("unexpected checksum");
+  }
+  const duration = performance.now() - start;
+  measureRange(measureName, startMark, endMark);
+  lessonOneStats.chunkedRuns += 1;
+  lessonOneStats.totalInteractions += iterations;
+  lessonOneStats.lastDurationMs = duration;
+  lessonOneStats.lastScenario = "chunked";
+  return duration;
+}
+
 export function resetLessonOneStats(): void {
   lessonOneStats.baselineRuns = 0;
   lessonOneStats.heavyRuns = 0;
+  lessonOneStats.chunkedRuns = 0;
   lessonOneStats.totalInteractions = 0;
   lessonOneStats.lastDurationMs = 0;
   lessonOneStats.lastScenario = "none";

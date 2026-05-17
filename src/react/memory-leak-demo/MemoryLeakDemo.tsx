@@ -996,7 +996,9 @@ export default function MemoryLeakDemo() {
                     </p>
                     <p className="concept-note-ref">
                       完整表述见仓库{" "}
-                      <code>.ai/specs/chrome-memory-leak-course.spec.md</code>{" "}
+                      <code>
+                        .ai/specs/2026-05-16-chrome-memory-leak-course.spec.md
+                      </code>{" "}
                       第 4 课「知识点」。
                     </p>
                   </div>

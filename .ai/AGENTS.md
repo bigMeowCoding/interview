@@ -65,11 +65,12 @@ JavaScript 代码必须有详尽的注释。
 
 ### 本仓库的 Agent 配置位置
 
-| 路径                  | 说明                                                                    |
-| --------------------- | ----------------------------------------------------------------------- |
-| `.ai/claude/`         | Claude Code：`CLAUDE.md`（跳转）、`settings*.json`、`hooks/`、`skills/` |
-| `.ai/constitution.md` | 项目开发宪法（全仓 Agent 须遵循）                                       |
-| `.ai/codex/`          | Codex skills（如 `development-agent`、`sum`）                           |
+| 路径                  | 说明                                                                            |
+| --------------------- | ------------------------------------------------------------------------------- |
+| `.ai/specs/`          | 可验收规格：文件名须带 **`YYYY-MM-DD-`** 前缀，规则见 **`.ai/specs/README.md`** |
+| `.ai/claude/`         | Claude Code：`CLAUDE.md`（跳转）、`settings*.json`、`hooks/`、`skills/`         |
+| `.ai/constitution.md` | 项目开发宪法（全仓 Agent 须遵循）                                               |
+| `.ai/codex/`          | Codex skills（如 `development-agent`、`sum`）                                   |
 
 仓库根目录的 `.claude`、`.codex` 为指向以上目录的**符号链接**，便于工具按默认路径解析；以 `.ai/` 下为唯一真实副本。
 

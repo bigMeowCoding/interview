@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>遗传算法 TSP 可视化</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="control-panel">
+        <header class="panel-header">
+          <div class="logo" aria-hidden="true">TSP</div>
+          <div>
+            <h1 class="title">遗传算法 · TSP</h1>
+            <p class="subtitle">Traveling Salesman Visualization</p>
+          </div>
+        </header>
+
+        <p class="hint">
+          单击画布添加城市，拖拽移动；<strong>新演示</strong> 会随机重排城市位置。
+        </p>
+
+        <section class="panel-section">
+          <h2 class="section-title">算法参数</h2>
+          <div class="param-group">
+            <div class="param-head">
+              <label for="pop-size">种群大小</label>
+              <span class="param-value" id="val-pop">100</span>
+            </div>
+            <input type="range" id="pop-size" min="20" max="500" value="100" />
+          </div>
+          <div class="param-group">
+            <div class="param-head">
+              <label for="mut-rate">变异率</label>
+              <span class="param-value" id="val-mut">0.02</span>
+            </div>
+            <input type="range" id="mut-rate" min="0" max="0.5" step="0.01" value="0.02" />
+          </div>
+          <div class="param-group">
+            <div class="param-head">
+              <label for="anim-speed">进化速度</label>
+              <span class="param-value" id="val-speed">1</span>
+            </div>
+            <input type="range" id="anim-speed" min="1" max="50" value="1" />
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <h2 class="section-title">控制</h2>
+          <div class="buttons">
+            <button id="btn-start" type="button" class="btn btn-primary">
+              <span class="btn-icon" aria-hidden="true">▶</span>开始
+            </button>
+            <button id="btn-stop" type="button" class="btn btn-danger">
+              <span class="btn-icon" aria-hidden="true">⏸</span>暂停
+            </button>
+            <button id="btn-reset" type="button" class="btn btn-secondary">
+              <span class="btn-icon" aria-hidden="true">↺</span>重置
+            </button>
+            <button id="btn-new-demo" type="button" class="btn btn-secondary">
+              <span class="btn-icon" aria-hidden="true">✦</span>新演示
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-section panel-section--grow">
+          <h2 class="section-title">实时统计</h2>
+          <div class="stats-cards">
+            <div class="stat-card">
+              <span class="stat-label">代数</span>
+              <span class="stat-value" id="stat-gen">0</span>
+            </div>
+            <div class="stat-card stat-card--accent">
+              <span class="stat-label">最优距离</span>
+              <span class="stat-value" id="stat-best">—</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">平均距离</span>
+              <span class="stat-value" id="stat-avg">—</span>
+            </div>
+          </div>
+          <div class="stats-chart-wrap">
+            <div class="chart-header">
+              <span class="chart-label">进化曲线</span>
+              <span class="chart-legend">
+                <span class="legend-item legend-best">最优</span>
+                <span class="legend-item legend-avg">平均</span>
+              </span>
+            </div>
+            <canvas id="stats-canvas"></canvas>
+          </div>
+        </section>
+      </aside>
+
+      <main class="canvas-area">
+        <div class="canvas-toolbar">
+          <span class="toolbar-badge">Canvas</span>
+          <span class="toolbar-hint">闭合路径 · 欧氏距离</span>
+        </div>
+        <div class="canvas-frame">
+          <canvas id="main-canvas"></canvas>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

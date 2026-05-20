@@ -110,6 +110,7 @@ JavaScript 代码必须有详尽的注释。
 | `ssr/`       | 基于 webpack 的 SSR 演示 |
 | `webpack/`   | Webpack 配置示例         |
 | `webpack2/`  | 额外 webpack 配置        |
+| `ga-tsp/`    | 遗传算法 TSP 可视化（Vite + Canvas + Worker） |
 
 ## 技术栈
 

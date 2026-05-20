@@ -1,4 +1,0 @@
-interface:
-  display_name: "Sum"
-  short_description: "Add two numeric inputs"
-  default_prompt: "Use $sum to add two numeric inputs and return only the result line."

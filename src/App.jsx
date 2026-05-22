@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   createRound,
   finalizeRound,
@@ -41,6 +41,17 @@ export default function App() {
     [simResult],
   );
 
+  useEffect(() => {
+    const onResize = () => {
+      document.documentElement.style.setProperty(
+        '--vh',
+        `${window.innerHeight * 0.01}px`,
+      );
+    };
+    window.addEventListener('resize', onResize);
+    onResize();
+  }, []);
+
   const handlePick = (door) => {
     setRound((r) => pickDoor(r, door));
   };
@@ -54,20 +65,16 @@ export default function App() {
   };
 
   const handleBatchSim = () => {
-    setSimRunning(true);
-    requestAnimationFrame(() => {
-      setSimResult({
-        stay: simulate('stay', SIM_TRIALS),
-        switch: simulate('switch', SIM_TRIALS),
-      });
-      setSimRunning(false);
+    setSimResult({
+      stay: simulate('stay', SIM_TRIALS),
+      switch: simulate('switch', SIM_TRIALS),
     });
   };
 
   const statusText = (() => {
     if (round.phase === 'pick') return '请选择一扇门';
     if (round.phase === 'decide') {
-      return `你选了门 ${DOOR_LABELS[round.pickedDoor]}，主持人打开了门 ${DOOR_LABELS[round.revealedDoor]}（羊）。要换到另一扇门吗？`;
+      return `你选了门 ${DOOR_LABELS[round.pickedDoor]}，主持人打开了门 ${DOOR_LABELS[round.pickedDoor]}（羊）。要换到另一扇门吗？`;
     }
     const action = round.switched ? '换门' : '坚持';
     return round.won
@@ -207,7 +214,7 @@ export default function App() {
           {simRunning ? '模拟中…' : '运行批量模拟'}
         </button>
 
-        {staySim && switchSim && (
+        {staySim?.rate && switchSim?.rate && (
           <div className="sim-results">
             <div className="sim-card">
               <span className="sim-label">坚持不换</span>

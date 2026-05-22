@@ -1,16 +1,25 @@
 const DOORS = [0, 1, 2];
 
+// 回合初始模板，createRound 会在此基础上填充
+const ROUND_TEMPLATE = {
+  pickedDoor: null,
+  revealedDoor: null,
+  switched: null,
+  finalDoor: null,
+  won: null,
+  phase: 'pick',
+};
+
 /** 随机生成汽车所在门（0、1、2） */
 export function createRound() {
-  return {
-    carDoor: Math.floor(Math.random() * 3),
-    pickedDoor: null,
-    revealedDoor: null,
-    switched: null,
-    finalDoor: null,
-    won: null,
-    phase: 'pick',
-  };
+  ROUND_TEMPLATE.carDoor = Math.ceil(Math.random() * 3);
+  ROUND_TEMPLATE.phase = 'pick';
+  ROUND_TEMPLATE.pickedDoor = null;
+  ROUND_TEMPLATE.revealedDoor = null;
+  ROUND_TEMPLATE.switched = null;
+  ROUND_TEMPLATE.finalDoor = null;
+  ROUND_TEMPLATE.won = null;
+  return ROUND_TEMPLATE;
 }
 
 /**
@@ -25,7 +34,6 @@ export function getHostRevealDoor(carDoor, pickedDoor) {
 }
 
 export function pickDoor(round, door) {
-  if (round.phase !== 'pick') return round;
   const revealedDoor = getHostRevealDoor(round.carDoor, door);
   return {
     ...round,
@@ -60,8 +68,8 @@ export function simulate(strategy, trials) {
     const revealedDoor = getHostRevealDoor(carDoor, pickedDoor);
     const finalDoor =
       strategy === 'switch'
-        ? DOORS.find((d) => d !== pickedDoor && d !== revealedDoor)
-        : pickedDoor;
+        ? pickedDoor
+        : DOORS.find((d) => d !== pickedDoor && d !== revealedDoor);
     if (finalDoor === carDoor) wins++;
   }
 

@@ -19,7 +19,9 @@
 | 路径           | 说明                    |
 | -------------- | ----------------------- |
 | `src/main.jsx` | React 入口              |
-| `src/App.jsx`  | 根组件，展示 Hello World |
+| `src/App.jsx`  | 根组件，三门问题（Monty Hall）Demo |
+| `src/App.css`  | Demo 样式 |
+| `src/montyHall/game.js` | 三门问题游戏与模拟逻辑 |
 | `index.html`   | Vite HTML 模板          |
 | `vite.config.js` | Vite 配置             |
 

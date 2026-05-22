@@ -1,16 +1,6 @@
-import commonjs from 'vite-plugin-commonjs';
-import {defineConfig} from "vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-    plugins: [
-        commonjs({
-            filter(id) {
-                if (id.includes('node_modules/redux-storage/build-es')) {
-                    return true;
-                }
-            },
-        }),
-        // Other plugins
-    ],
-    // Other configurations
+  plugins: [react()],
 });

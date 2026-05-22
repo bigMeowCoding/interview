@@ -11,8 +11,10 @@ export class GAWorkerProxy {
     this.worker = new Worker(new URL('./worker/ga.worker.ts', import.meta.url), {
       type: 'module',
     });
-    this.worker.onmessage = (e: MessageEvent<{ type: string; payload: GenerationStats }>) => {
-      if (e.data.type === 'TICK') this.onTick(e.data.payload);
+    this.worker.onmessage = (e: MessageEvent<{ type: string; payload?: GenerationStats }>) => {
+      if (e.data.type === 'TICK' && e.data.payload) {
+        this.onTick(e.data.payload);
+      }
     };
   }
 

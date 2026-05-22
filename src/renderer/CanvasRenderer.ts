@@ -45,7 +45,7 @@ export class CanvasRenderer {
     cities.forEach((city) => {
       const isHover = city.id === hoverId;
       const isDrag = city.id === dragId;
-      const radius = isDrag ? 9 : isHover ? 8 : 6;
+      const radius = isDrag ? 9 : isHover ? 10 : 6;
 
       this.ctx.beginPath();
       this.ctx.arc(city.x, city.y, radius, 0, Math.PI * 2);

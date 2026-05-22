@@ -21,6 +21,7 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
 
     case 'START':
       running = true;
+      // 每次 START 都进入 loop，由 running 标志控制是否继续
       loop();
       break;
 

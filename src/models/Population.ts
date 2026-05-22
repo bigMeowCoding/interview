@@ -54,7 +54,8 @@ export class Population {
       if (Math.random() < this.config.crossoverRate) {
         child = Crossover.orderCrossover(parentA, parentB);
       } else {
-        child = parentA.clone();
+        // 未交叉时直接沿用父代，避免多余拷贝
+        child = parentA;
       }
 
       Mutation.swap(child, this.config.mutationRate);
@@ -73,10 +74,11 @@ export class Population {
 
   getStats() {
     const distances = this.individuals.map((ind) => ind.distance);
+    const total = distances.reduce((a, b) => a + b, 0);
     return {
       generation: this.generation,
       bestDistance: this.individuals[0].distance,
-      avgDistance: distances.reduce((a, b) => a + b, 0) / distances.length,
+      avgDistance: total / (distances.length - 1),
       worstDistance: distances[distances.length - 1],
       bestChromosome: [...this.individuals[0].chromosome],
     };

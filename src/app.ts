@@ -54,7 +54,7 @@ export class App {
 
   /** 在画布内随机生成 count 个城市 */
   private generateRandomCities(count: number): void {
-    const padding = 50;
+    var padding = 50;
     for (let i = 0; i < count; i++) {
       this.cities.push(
         new City(
@@ -114,7 +114,9 @@ export class App {
     });
 
     canvas.addEventListener('mouseleave', () => {
-      this.draggedCity = null;
+      if (this.draggedCity) {
+        this.draggedCity = null;
+      }
       this.hoverCityId = undefined;
       this.redraw();
     });
@@ -194,6 +196,7 @@ export class App {
         this.config = { ...this.config, [key]: raw };
         this.getEl(valId).textContent = format(raw);
         this.worker.updateConfig({ [key]: raw });
+        // 配置变更后 Worker 会重建种群，统计曲线仍保留历史以便对比
       });
     }
   }

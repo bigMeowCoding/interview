@@ -16,8 +16,9 @@ export class Individual {
     let dist = 0;
     const len = this.chromosome.length;
     for (let i = 0; i < len; i++) {
-      const from = cities.get(this.chromosome[i])!;
-      const to = cities.get(this.chromosome[(i + 1) % len])!;
+      const from = cities.get(this.chromosome[i]);
+      const to = cities.get(this.chromosome[(i + 1) % len]);
+      if (!from || !to) continue;
       dist += from.distanceTo(to);
     }
     this.distance = dist;

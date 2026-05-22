@@ -41,14 +41,14 @@ export class StatsRenderer {
       this.ctx.beginPath();
       this.ctx.strokeStyle = color;
       this.ctx.lineWidth = 2;
-      this.history.forEach((point, i) => {
+      this.history.forEach((p, idx) => {
         const x =
-          (i / Math.max(this.history.length - 1, 1)) * (width - pad * 2) + pad;
+          (idx / Math.max(this.history.length - 1, 1)) * (width - pad * 2) + pad;
         const y =
           height -
           pad -
-          ((point[key] - minDist) / range) * (height - pad * 2);
-        if (i === 0) this.ctx.moveTo(x, y);
+          ((p[key] - minDist) / range) * (height - pad * 2);
+        if (idx === 0) this.ctx.moveTo(x, y);
         else this.ctx.lineTo(x, y);
       });
       this.ctx.stroke();

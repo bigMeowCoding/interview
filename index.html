@@ -3,10 +3,93 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>三门问题 Demo</title>
+    <title>遗传算法 TSP 可视化</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="app">
+      <aside id="control-panel">
+        <header class="panel-header">
+          <h1>GA · TSP</h1>
+          <p class="panel-subtitle">遗传算法求解旅行商问题</p>
+        </header>
+
+        <div class="param-group">
+          <label for="pop-size">
+            种群大小 <span id="val-pop" class="param-value">100</span>
+          </label>
+          <input type="range" id="pop-size" min="20" max="500" value="100" />
+        </div>
+
+        <div class="param-group">
+          <label for="mut-rate">
+            变异率 <span id="val-mut" class="param-value">0.02</span>
+          </label>
+          <input type="range" id="mut-rate" min="0" max="0.5" step="0.01" value="0.02" />
+        </div>
+
+        <div class="param-group">
+          <label for="cross-rate">
+            交叉率 <span id="val-cross" class="param-value">0.90</span>
+          </label>
+          <input type="range" id="cross-rate" min="0" max="1" step="0.05" value="0.9" />
+        </div>
+
+        <div class="param-group">
+          <label for="anim-speed">
+            进化速度 <span id="val-speed" class="param-value">1</span>
+          </label>
+          <input type="range" id="anim-speed" min="1" max="50" value="1" />
+        </div>
+
+        <div class="buttons">
+          <button id="btn-start" class="btn btn--primary">开始</button>
+          <button id="btn-stop" class="btn">暂停</button>
+          <button id="btn-reset" class="btn">重置</button>
+          <button id="btn-new-demo" class="btn">新演示</button>
+        </div>
+
+        <div class="stats-text">
+          <div class="stat-row">
+            <span class="stat-label">代数</span>
+            <span id="stat-gen" class="stat-num">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">最优距离</span>
+            <span id="stat-best" class="stat-num">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">平均距离</span>
+            <span id="stat-avg" class="stat-num">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">城市数</span>
+            <span id="stat-cities" class="stat-num">0</span>
+          </div>
+        </div>
+
+        <p class="hint">
+          单击画布添加城市，拖拽移动城市。算法在 Web Worker 中运行，不阻塞 UI。
+        </p>
+      </aside>
+
+      <main class="canvas-area">
+        <canvas id="main-canvas"></canvas>
+        <div class="stats-panel">
+          <span class="stats-title">进化曲线</span>
+          <canvas id="stats-canvas"></canvas>
+          <div class="legend">
+            <span class="legend-item legend-item--best">最优</span>
+            <span class="legend-item legend-item--avg">平均</span>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
